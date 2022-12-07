@@ -61,6 +61,8 @@ Ready to contribute? Here's how to set up `gbif_registrar` for local development
     ```console
     $ git checkout -b name-of-your-bugfix-or-feature
     ```
+    
+    > Note, this project uses Python Semantic Release, which requires the Angular commit style. For guidance, see: https://py-pkgs.org/07-releasing-versioning.html#automatic-version-bumping
 
 4. When you're done making changes, check that your changes conform to any code formatting requirements and pass any tests.
 
