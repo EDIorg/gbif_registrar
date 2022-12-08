@@ -38,12 +38,27 @@ If you are proposing a feature:
 * Remember that this is a volunteer-driven project, and that contributions
   are welcome :)
 
-## git structure
+## Repository Structure
+
+This repository is structured as a standard Python package following the conventions outlined in the [Python Packges](https://py-pkgs.org/) guide.
+
+## Git Structure
 
 The active branch is `development`. `development` is merged into `main` for releases. Please submit your pull requests to `development`.
 
-## Repository structure
-This repository is structured as a standard Python package following the conventions outlined in the [Python Packges](https://py-pkgs.org/) guide.
+## Git Commit Guidelines
+
+This project uses Python Semantic Release, which requires the Angular commit style. For guidance, see: https://py-pkgs.org/07-releasing-versioning.html#automatic-version-bumping.
+
+## Testing
+
+Any new feature or bug-fix should include a unit-test demonstrating the change. Unit tests follow the [pytest](https://docs.pytest.org) framework with files in tests/. Please make sure that the testing suite passes before issuing a pull request. 
+
+This package uses GitHub Actions continuous testing mechanism to ensure that the test suite is run on each pull request to `development` and `main`.
+
+## Style and Formatting
+
+This project uses [black](https://black.readthedocs.io/en/stable/) for code formatting, and [numpy](https://numpydoc.readthedocs.io/en/latest/format.html#style-guide) conventions for docstrings.
 
 ## Get Started!
 
