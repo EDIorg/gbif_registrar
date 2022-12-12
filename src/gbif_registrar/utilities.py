@@ -52,3 +52,30 @@ def initialize_registrations_file(file_path):
         ]
         df = pd.DataFrame(columns=cols)
         df.to_csv(file_path, index=False, mode="x")
+
+
+def read_registrations_file(file_path):
+    """Reads the registrations file.
+
+    Parameters
+    ----------
+    file_path : Any
+        Path of the registrations file.
+
+    Returns
+    -------
+    DataFrame
+        Pandas dataframe with the gbif_crawl_datetime column formatted as
+        datetime.
+
+    See Also
+    --------
+    validate_registrations_file
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('/Users/me/docs/registrations.csv')
+    """
+    regs = pd.read_csv(file_path, delimiter=",")
+    regs["gbif_crawl_datetime"] = pd.to_datetime(regs["gbif_crawl_datetime"])
+    return regs
