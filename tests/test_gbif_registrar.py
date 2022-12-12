@@ -1,1 +1,0 @@
-from gbif_registrar import gbif_registrar
