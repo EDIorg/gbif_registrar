@@ -1,5 +1,5 @@
 """A module for validating the registrations file"""
-import pandas as pd
+from src.gbif_registrar.utilities import read_registrations_file
 
 
 def validate_registrations_file(file_path, extended_checks=False):
@@ -18,19 +18,9 @@ def validate_registrations_file(file_path, extended_checks=False):
     -------
     None
 
-    Warnings
-    --------
-    Core checks
-        If registrations are incomplete.
-        If local_dataset_id values (primary keys) are not unique.
-        If local_dataset_group_id and gbif_dataset_uuid don't have 1-to-1
-        cardinality.
-        If local_dataset_id and local_dataset_endpoint don't have 1-to-1
-        cardinality.
-        If local_dataset_id has not been crawled.
-    Extended checks
-        If local_dataset_id has an invalid format.
-        If local_dataset_id has an incorrect local_dataset_group_id.
+    Warns
+    -----
+        If core or extended issues are found.
 
     See Also
     --------
@@ -44,8 +34,9 @@ def validate_registrations_file(file_path, extended_checks=False):
 
     >>> validate_registrations('/Users/me/docs/registrations.csv', extended_checks=TRUE)
     """
-    # read registrations
+    regs = read_registrations_file(file_path)
     # check core criteria
+    check_core()
     # check extended
     if extended_checks:
         pass
@@ -53,7 +44,37 @@ def validate_registrations_file(file_path, extended_checks=False):
 
 
 
-def check_core():
+def check_core(regs):
+    """Checks the registrations dataframe for core properties.
+
+    Core checks are typically called through `validate_registrations_file`.
+
+    Parameters
+    ----------
+    regs : DataFrame
+        A Pandas DataFrame of the registrations file. Use
+        `read_registrations_file` to create this.
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+    Core checks
+        If registrations are incomplete.
+        If local_dataset_id values (primary keys) are not unique.
+        If local_dataset_group_id and gbif_dataset_uuid don't have 1-to-1
+        cardinality.
+        If local_dataset_id and local_dataset_endpoint don't have 1-to-1
+        cardinality.
+        If local_dataset_id has not been crawled.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('/Users/me/docs/registrations.csv')
+    >>> check_core(regs)
+    """
     # incomplete registrations
     # unique primary keys
     # Local dataset group ID and GBIF dataset uuid are 1-to-1
@@ -61,7 +82,30 @@ def check_core():
     # Has been crawled
     return None
 
-def check_extended():
+def check_extended(regs):
+    """
+
+    Parameters
+    ----------
+    regs : DataFrame
+        A Pandas DataFrame of the registrations file.  Use
+        `read_registrations_file` to create this.
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+        If local_dataset_id has an invalid format.
+        If local_dataset_id has an incorrect local_dataset_group_id.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('/Users/me/docs/registrations.csv')
+    >>> check_core(regs)
+    """
+
     # Local dataset ID has correct format
     # Local dataset ID has correct local dataset group ID
     return None
