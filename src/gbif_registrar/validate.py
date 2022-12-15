@@ -1,5 +1,6 @@
 """A module for validating the registrations file"""
 from src.gbif_registrar.utilities import read_registrations_file
+from gbif_registrar.utilities import expected_cols
 import warnings
 
 
@@ -46,30 +47,14 @@ def validate_registrations_file(file_path, extended_checks=False):
     >>> validate_registrations('/Users/me/docs/registrations.csv', extended_checks=TRUE)
     """
     registrations = read_registrations_file(file_path)
-    check_core(registrations)
-    if extended_checks:
-        check_extended(registrations)
-    return None
-
-
-def check_core(regs):
-    """Checks registrations for core properties.
-
-    Parameters
-    ----------
-    regs : pandas.DataFrame
-        Create this with `read_registrations_file`.
-
-    Returns
-    -------
-    None
-    """
     check_completeness(regs)
     # unique primary keys
     # Local dataset group ID and GBIF dataset uuid are 1-to-1
     # Local dataset ID and Local dataset endpoint are 1-to-1
     # Has been crawled
-    return None
+    if extended_checks:
+        # Local dataset ID has correct format
+        # Local dataset ID has correct local dataset group ID
 
 
 def check_completeness(regs):
@@ -88,35 +73,15 @@ def check_completeness(regs):
     Warns
     -----
     UserWarning
-        If registrations are incomplete. I.e. Is missing any value from a
+        If registrations are incomplete. I.e. is missing any value from a
         dataset registration, except for `gbif_crawl_datetime`, which is not
         essential for initiating a GBIF crawl.
     """
-    regs
-    warnings.warn('Incomplete registrations')
+    regs = regs[expected_cols()].drop(['gbif_crawl_datetime'], axis=1)
+    regs = regs[regs.isna().any(axis=1)]
+    rows = regs.index.to_series() + 1
+    rows = rows.astype('string')
+    if any(rows):
+        warnings.warn('Incomplete registrations in rows: ' + ', '.join(rows))
 
-
-def check_extended(regs):
-    """
-
-    Parameters
-    ----------
-    regs : DataFrame
-        A Pandas DataFrame of the registrations file.  Use
-        `read_registrations_file` to create this.
-
-    Returns
-    -------
-    None
-
-
-    Examples
-    --------
-    >>> regs = read_registrations_file('/Users/me/docs/registrations.csv')
-    >>> check_core(regs)
-    """
-
-    # Local dataset ID has correct format
-    # Local dataset ID has correct local dataset group ID
-    return None
 

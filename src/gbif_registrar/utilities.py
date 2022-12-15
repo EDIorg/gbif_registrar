@@ -79,3 +79,15 @@ def read_registrations_file(file_path):
     regs = pd.read_csv(file_path, delimiter=",")
     regs["gbif_crawl_datetime"] = pd.to_datetime(regs["gbif_crawl_datetime"])
     return regs
+
+
+def expected_cols():
+    """Expected columns of the registrations file"""
+    expected_cols = [
+        "local_dataset_id",
+        "local_dataset_group_id",
+        "local_dataset_endpoint",
+        "gbif_dataset_uuid",
+        "gbif_crawl_datetime",
+    ]
+    return expected_cols
