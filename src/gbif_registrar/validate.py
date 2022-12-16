@@ -58,7 +58,7 @@ def check_local_dataset_id(regs):
 
 
 def check_group_registrations(regs):
-    """Checks the local_dataset_group_id and gbif_dataset_uuid are 1-to-1.
+    """Checks uniqueness of dataset group registrations.
 
     Parameters
     ----------
@@ -75,6 +75,45 @@ def check_group_registrations(regs):
     If local_dataset_group_id and gbif_dataset_uuid don't have 1-to-1
         cardinality.
     """
+    # This can be solved by isolating the 2 columns, dropping replicate rows,
+    # and then looking for counts > 1 in the first column (instances of
+    # one-to-many relationships), and then doing the same for the other column.
+    df = regs[['local_dataset_group_id', 'gbif_dataset_uuid']].drop_duplicates()
+    # Check the first column for issues
+    group_counts = df['local_dataset_group_id'].value_counts()
+    for group_count in list(zip(group_counts.index, group_counts)):
+        if group_count[1] > 1:
+            warnings.warn('Non-unique group registrations. ' + group_count[0] + ' has > 1 gbif_dataset_uuid.')
+    # Then check the second column for issues
+    group_counts = df['gbif_dataset_uuid'].value_counts()
+    group_counts = list(zip(group_counts.index, group_counts))
+    for group_count in group_counts:
+        if group_count[1] > 1:
+            warnings.warn('Non-unique group registrations. ' + group_count[0] + ' has > 1 local_dataset_group_id.')
+
+
+def check_local_endpoints(regs):
+    """Checks uniqueness of local dataset endpoints
+
+    Parameters
+    ----------
+    regs : pandas.DataFrame
+        A dataframe of the registrations file. Use`read_registrations_file` to
+        create this.
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+    If local_dataset_id and local_dataset_endpoint don't have 1-to-1
+        cardinality.
+
+    """
+    # Assuming primary keys (local_dataset_id), non-1-to-1 relationships are
+    # represented by non-unique endpoints. I.e. only need to look for and report
+    # row indices of duplicate local_dataset_endpoint.
     pass
 
 
@@ -97,8 +136,6 @@ def validate_registrations_file(file_path, extended_checks=False):
     Warns
     -----
     Core checks
-        If local_dataset_id and local_dataset_endpoint don't have 1-to-1
-        cardinality.
         If local_dataset_id has not been crawled.
     Extended checks
         If local_dataset_id has an invalid format.
@@ -119,9 +156,9 @@ def validate_registrations_file(file_path, extended_checks=False):
     regs = read_registrations_file(file_path)
     check_completeness(regs)
     check_local_dataset_id(regs)
-    # Local dataset group ID and GBIF dataset uuid are 1-to-1
-    check_local_group_and_gbif_id(regs)
+    check_group_registrations(regs)
     # Local dataset ID and Local dataset endpoint are 1-to-1
+    check_local_endpoints(regs)
     # Has been crawled
     if extended_checks:
         pass
