@@ -1,11 +1,11 @@
 """A module for validating the registrations file"""
-from src.gbif_registrar.utilities import read_registrations_file
-from gbif_registrar.utilities import expected_cols
 import warnings
 import pandas as pd
+from gbif_registrar.utilities import read_registrations_file
+from gbif_registrar.utilities import expected_cols
 
 
-def check_completeness(regs):
+def check_completeness(rgstrs):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
@@ -14,7 +14,7 @@ def check_completeness(regs):
 
     Parameters
     ----------
-    regs : pandas.DataFrame
+    rgstrs : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -29,18 +29,18 @@ def check_completeness(regs):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_completeness(regs)
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_completeness(rgstrs)
     """
-    regs = regs[expected_cols()].drop(['gbif_crawl_datetime'], axis=1)
-    regs = regs[regs.isna().any(axis=1)]
-    if len(regs) > 0:
-        rows = regs.index.to_series() + 1
-        rows = rows.astype('string')
-        warnings.warn('Incomplete registrations in rows: ' + ', '.join(rows))
+    rgstrs = rgstrs[expected_cols()].drop(["gbif_crawl_datetime"], axis=1)
+    rgstrs = rgstrs[rgstrs.isna().any(axis=1)]
+    if len(rgstrs) > 0:
+        rows = rgstrs.index.to_series() + 1
+        rows = rows.astype("string")
+        warnings.warn("Incomplete registrations in rows: " + ", ".join(rows))
 
 
-def check_local_dataset_id(regs):
+def check_local_dataset_id(rgstrs):
     """Checks registrations for unique local_dataset_id.
 
     Each registration is represented by a unique primary key, i.e. the
@@ -48,7 +48,7 @@ def check_local_dataset_id(regs):
 
     Parameters
     ----------
-    regs : pandas.DataFrame
+    rgstrs : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -63,14 +63,14 @@ def check_local_dataset_id(regs):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_local_dataset_id(regs)
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_local_dataset_id(rgstrs)
     """
-    dupes = regs['local_dataset_id'].duplicated()
+    dupes = rgstrs["local_dataset_id"].duplicated()
     if any(dupes):
         dupes = dupes.index.to_series() + 1
-        dupes = dupes.astype('string')
-        warnings.warn('Duplicate local_dataset_id values in rows: ' + ', '.join(dupes))
+        dupes = dupes.astype("string")
+        warnings.warn("Duplicate local_dataset_id values in rows: " + ", ".join(dupes))
 
 
 def check_one_to_one_cardinality(df, col1, col2):
@@ -96,20 +96,27 @@ def check_one_to_one_cardinality(df, col1, col2):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_one_to_one_cardinality( \
+        df=rgstrs, col1='local_dataset_id', col2='local_dataset_endpoint' \
+    )
     """
     df = df[[col1, col2]].drop_duplicates()
     group_counts = pd.concat([df[col1].value_counts(), df[col2].value_counts()])
     replicates = group_counts > 1
     if any(replicates):
-        msg = col1 + ' and ' + col2 + ' should have 1-to-1 cardinality. ' + \
-              'However, > 1 corresponding element was found for: ' + \
-              ', '.join(group_counts[replicates].index.to_list())
+        msg = (
+            col1
+            + " and "
+            + col2
+            + " should have 1-to-1 cardinality. "
+            + "However, > 1 corresponding element was found for: "
+            + ", ".join(group_counts[replicates].index.to_list())
+        )
         warnings.warn(msg)
 
 
-def check_group_registrations(regs):
+def check_group_registrations(rgstrs):
     """Checks uniqueness of dataset group registrations.
 
     Registrations can be part of a group, the most recent of which is
@@ -117,7 +124,7 @@ def check_group_registrations(regs):
 
     Parameters
     ----------
-    regs : pandas.DataFrame
+    rgstrs : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -132,13 +139,15 @@ def check_group_registrations(regs):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_group_registrations(regs)
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_group_registrations(rgstrs)
     """
-    check_one_to_one_cardinality(df=regs, col1='local_dataset_group_id', col2='gbif_dataset_uuid')
+    check_one_to_one_cardinality(
+        df=rgstrs, col1="local_dataset_group_id", col2="gbif_dataset_uuid"
+    )
 
 
-def check_local_endpoints(regs):
+def check_local_endpoints(rgstrs):
     """Checks uniqueness of local dataset endpoints.
 
     Registrations each have a unique endpoint, which is crawled by GBIF and
@@ -146,7 +155,7 @@ def check_local_endpoints(regs):
 
     Parameters
     ----------
-    regs : pandas.DataFrame
+    rgstrs : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -161,13 +170,15 @@ def check_local_endpoints(regs):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_local_endpoints(regs)
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_local_endpoints(rgstrs)
     """
-    check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
+    check_one_to_one_cardinality(
+        df=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
+    )
 
 
-def check_crawl_datetime(regs):
+def check_crawl_datetime(rgstrs):
     """Checks if registrations have been crawled.
 
     Registrations contain all the information needed for GBIF to successfully
@@ -176,7 +187,7 @@ def check_crawl_datetime(regs):
 
     Parameters
     ----------
-    regs : pandas.DataFrame
+    rgstrs : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -190,18 +201,18 @@ def check_crawl_datetime(regs):
 
     Examples
     --------
-    >>> regs = read_registrations_file('tests/registrations.csv')
-    >>> check_crawl_datetime(regs)
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> check_crawl_datetime(rgstrs)
     """
-    uncrawled = regs['gbif_crawl_datetime'].isna()
+    uncrawled = rgstrs["gbif_crawl_datetime"].isna()
     if any(uncrawled):
-        rows = regs[uncrawled].index.to_series() + 1
-        rows = rows.astype('string')
-        warnings.warn('Uncrawled registrations in rows: ' + ', '.join(rows))
+        rows = rgstrs[uncrawled].index.to_series() + 1
+        rows = rows.astype("string")
+        warnings.warn("Uncrawled registrations in rows: " + ", ".join(rows))
 
 
-def validate_registrations_file(file_path):
-    """Checks registrations for any issues.
+def validate_registrations(file_path):
+    """Validates the registrations file.
 
     This is a wrapper to `check_completeness`, `check_local_dataset_id`,
     `check_group_registrations`, `check_local_endpoints`, and
@@ -223,11 +234,11 @@ def validate_registrations_file(file_path):
 
     Examples
     --------
-    >>> validate_registrations_file('tests/registrations.csv')
+    >>> validate_registrations('tests/registrations.csv')
     """
-    regs = read_registrations_file(file_path)
-    check_completeness(regs)
-    check_local_dataset_id(regs)
-    check_group_registrations(regs)
-    check_local_endpoints(regs)
-    check_crawl_datetime(regs)
+    rgstrs = read_registrations_file(file_path)
+    check_completeness(rgstrs)
+    check_local_dataset_id(rgstrs)
+    check_group_registrations(rgstrs)
+    check_local_endpoints(rgstrs)
+    check_crawl_datetime(rgstrs)
