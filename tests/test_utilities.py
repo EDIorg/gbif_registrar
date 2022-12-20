@@ -40,12 +40,12 @@ def test_initialize_registrations_file_has_expected_columns(tmp_path):
 
 def test_read_registrations_file_reads_file():
     """Reads the file."""
-    regs = read_registrations_file("tests/registrations.csv")
-    assert isinstance(regs, pd.DataFrame)
+    rgstrs = read_registrations_file("tests/registrations.csv")
+    assert isinstance(rgstrs, pd.DataFrame)
 
 
 def test_read_registrations_file_formats_datetime():
     """Formats the datetime column."""
-    regs = read_registrations_file("tests/registrations.csv")
-    crawl_time = regs["gbif_crawl_datetime"]
+    rgstrs = read_registrations_file("tests/registrations.csv")
+    crawl_time = rgstrs["gbif_crawl_datetime"]
     assert pd.core.dtypes.common.is_datetime64_dtype(crawl_time)

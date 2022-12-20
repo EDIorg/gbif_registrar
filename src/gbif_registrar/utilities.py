@@ -70,12 +70,24 @@ def read_registrations_file(file_path):
 
     See Also
     --------
-    validate_registrations_file
+    check_registrations_file
 
     Examples
     --------
-    >>> regs = read_registrations_file('/Users/me/docs/registrations.csv')
+    >>> rgstrs = read_registrations_file('/Users/me/docs/registrations.csv')
     """
-    regs = pd.read_csv(file_path, delimiter=",")
-    regs["gbif_crawl_datetime"] = pd.to_datetime(regs["gbif_crawl_datetime"])
-    return regs
+    rgstrs = pd.read_csv(file_path, delimiter=",")
+    rgstrs["gbif_crawl_datetime"] = pd.to_datetime(rgstrs["gbif_crawl_datetime"])
+    return rgstrs
+
+
+def expected_cols():
+    """Expected columns of the registrations file"""
+    cols = [
+        "local_dataset_id",
+        "local_dataset_group_id",
+        "local_dataset_endpoint",
+        "gbif_dataset_uuid",
+        "gbif_crawl_datetime",
+    ]
+    return cols
