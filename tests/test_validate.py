@@ -49,45 +49,42 @@ def test_check_local_dataset_id_warns(regs):
         assert '5' in str(w[0].message)
 
 
-def test_check_group_registrations_valid(regs):
+def test_check_one_to_one_cardinality_valid(regs):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
-        validate.check_group_registrations(regs)
+        validate.check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
         assert len(w) == 0
 
 
-def test_check_group_registrations_warn(regs):
-    """Each local_dataset_group_id should have only one gbif_dataset_group_id
-    (and vise versa) or else a warning is issued."""
-    regs.loc[0, 'local_dataset_group_id'] = 'bad_id'
-    regs.loc[2, 'gbif_dataset_uuid'] = 'bad_id'
+def test_check_one_to_one_cardinality_warn(regs):
+    """Each element in a one-to-one relationship should have only one
+    corresponding value, or else a warning is issued."""
+    regs.loc[0, 'local_dataset_id'] = regs.loc[1, 'local_dataset_id']
+    regs.loc[2, 'local_dataset_endpoint'] = regs.loc[
+        3, 'local_dataset_endpoint']
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
-        validate.check_group_registrations(regs)
-        assert 'Non-unique group registrations' in str(w[0].message)
-        assert 'edi.356' in str(w[0].message)
-        assert 'Non-unique group registrations' in str(w[1].message)
-        assert 'e44c5367-9d09-4328-9a5a-d0f41fb22d61' in str(w[1].message)
+        validate.check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
+        assert 'should have 1-to-1 cardinality' in str(w[0].message)
+        assert regs.loc[1, 'local_dataset_id'] in str(w[0].message)
+        assert regs.loc[3, 'local_dataset_endpoint'] in str(w[0].message)
 
 
-def test_check_local_endpoints_valid(regs):
+def test_check_crawl_datetime_valid(regs):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
-        validate.check_local_endpoints(regs)
+        validate.check_crawl_datetime(regs)
         assert len(w) == 0
 
 
-def test_check_local_endpoints_warn(regs): # FIXME refactor this
-    """Each local_dataset_id should have only one local_dataset_endpoint
-    (and vise versa) or else a warning is issued."""
-    regs.loc[0, 'local_dataset_id'] = 'bad_id'
-    regs.loc[2, 'local_dataset_endpoint'] = 'bad_endpoint' # FIXME duplicate existing endpoint
+def test_check_crawl_datetime_warn(regs):
+    """Uncrawled registrations result in a warning."""
+    regs.loc[0, 'gbif_crawl_datetime'] = np.nan
+    regs.loc[2, 'gbif_crawl_datetime'] = np.nan
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
-        validate.check_local_endpoints(regs)
-        assert 'Non-unique dataset endpoints' in str(w[0].message)
-        assert 'edi.356' in str(w[0].message)
-        assert 'Non-unique dataset endpoints' in str(w[1].message)
-        assert 'https://pasta.lternet.edu/package/archive/eml/edi/356/1/archive_edi.356.1_74665239205233345' in str(w[1].message)
+        validate.check_crawl_datetime(regs)
+        assert 'Uncrawled registrations in rows' in str(w[0].message)
+        assert '1, 3' in str(w[0].message)

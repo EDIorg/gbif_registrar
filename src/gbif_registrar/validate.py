@@ -2,10 +2,15 @@
 from src.gbif_registrar.utilities import read_registrations_file
 from gbif_registrar.utilities import expected_cols
 import warnings
+import pandas as pd
 
 
 def check_completeness(regs):
-    """Checks for registration completeness.
+    """Checks registrations for completeness.
+
+    A complete registration has values for all fields except (perhaps)
+    `gbif_crawl_datetime`, which is not essential for initiating a GBIF
+    crawl.
 
     Parameters
     ----------
@@ -20,9 +25,12 @@ def check_completeness(regs):
     Warns
     -----
     UserWarning
-        If registrations are incomplete. I.e. is missing any value from a
-        dataset registration, except for `gbif_crawl_datetime`, which is not
-        essential for initiating a GBIF crawl.
+        If any registrations are incomplete.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_completeness(regs)
     """
     regs = regs[expected_cols()].drop(['gbif_crawl_datetime'], axis=1)
     regs = regs[regs.isna().any(axis=1)]
@@ -33,7 +41,10 @@ def check_completeness(regs):
 
 
 def check_local_dataset_id(regs):
-    """Check uniqueness of local_dataset_id (primary key)
+    """Checks registrations for unique local_dataset_id.
+
+    Each registration is represented by a unique primary key, i.e. the
+    `local_dataset_id`.
 
     Parameters
     ----------
@@ -49,6 +60,11 @@ def check_local_dataset_id(regs):
     -----
     UserWarning
         If values in the `local_dataset_id` column are not unique.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_local_dataset_id(regs)
     """
     dupes = regs['local_dataset_id'].duplicated()
     if any(dupes):
@@ -57,9 +73,48 @@ def check_local_dataset_id(regs):
         warnings.warn('Duplicate local_dataset_id values in rows: ' + ', '.join(dupes))
 
 
+def check_one_to_one_cardinality(df, col1, col2):
+    """Check for one-to-one cardinality between two columns of a dataframe.
+
+    This is a helper function used in a couple registration checks.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    col1 : str
+        Column name
+    col2 : str
+        Column name
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+    If `col1` and `col2` don't have one-to-one cardinality.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
+    """
+    df = df[[col1, col2]].drop_duplicates()
+    group_counts = pd.concat([df[col1].value_counts(), df[col2].value_counts()])
+    replicates = group_counts > 1
+    if any(replicates):
+        msg = col1 + ' and ' + col2 + ' should have 1-to-1 cardinality. ' + \
+              'However, > 1 corresponding element was found for: ' + \
+              ', '.join(group_counts[replicates].index.to_list())
+        warnings.warn(msg)
+
+
 def check_group_registrations(regs):
     """Checks uniqueness of dataset group registrations.
 
+    Registrations can be part of a group, the most recent of which is
+    considered to be the authoratative version of the series.
+
     Parameters
     ----------
     regs : pandas.DataFrame
@@ -72,28 +127,22 @@ def check_group_registrations(regs):
 
     Warns
     -----
-    If local_dataset_group_id and gbif_dataset_uuid don't have 1-to-1
+    If `local_dataset_group_id` and `gbif_dataset_uuid` don't have one-to-one
         cardinality.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_group_registrations(regs)
     """
-    # This can be solved by isolating the 2 columns, dropping replicate rows,
-    # and then looking for counts > 1 in the first column (instances of
-    # one-to-many relationships), and then doing the same for the other column.
-    df = regs[['local_dataset_group_id', 'gbif_dataset_uuid']].drop_duplicates()
-    # Check the first column for issues
-    group_counts = df['local_dataset_group_id'].value_counts()
-    for group_count in list(zip(group_counts.index, group_counts)):
-        if group_count[1] > 1:
-            warnings.warn('Non-unique group registrations. ' + group_count[0] + ' has > 1 gbif_dataset_uuid.')
-    # Then check the second column for issues
-    group_counts = df['gbif_dataset_uuid'].value_counts()
-    group_counts = list(zip(group_counts.index, group_counts))
-    for group_count in group_counts:
-        if group_count[1] > 1:
-            warnings.warn('Non-unique group registrations. ' + group_count[0] + ' has > 1 local_dataset_group_id.')
+    check_one_to_one_cardinality(df=regs, col1='local_dataset_group_id', col2='gbif_dataset_uuid')
 
 
 def check_local_endpoints(regs):
-    """Checks uniqueness of local dataset endpoints
+    """Checks uniqueness of local dataset endpoints.
+
+    Registrations each have a unique endpoint, which is crawled by GBIF and
+    referenced to from the associated GBIF dataset page.
 
     Parameters
     ----------
@@ -107,27 +156,61 @@ def check_local_endpoints(regs):
 
     Warns
     -----
-    If local_dataset_id and local_dataset_endpoint don't have 1-to-1
+    If `local_dataset_id` and `local_dataset_endpoint` don't have one-to-one
         cardinality.
 
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_local_endpoints(regs)
     """
-    # Assuming primary keys (local_dataset_id), non-1-to-1 relationships are
-    # represented by non-unique endpoints. I.e. only need to look for and report
-    # row indices of duplicate local_dataset_endpoint.
-    pass
+    check_one_to_one_cardinality(df=regs, col1='local_dataset_id', col2='local_dataset_endpoint')
 
 
-def validate_registrations_file(file_path, extended_checks=False):
-    """Checks the registrations file for issues.
+def check_crawl_datetime(regs):
+    """Checks if registrations have been crawled.
+
+    Registrations contain all the information needed for GBIF to successfully
+    crawl the corresponding dataset and post to the GBIF data portal. Datetime
+    values in the `gbif_crawl_datetime` indicate the dataset has been crawled.
+
+    Parameters
+    ----------
+    regs : pandas.DataFrame
+        A dataframe of the registrations file. Use`read_registrations_file` to
+        create this.
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+    If a registration has not yet been crawled.
+
+    Examples
+    --------
+    >>> regs = read_registrations_file('tests/registrations.csv')
+    >>> check_crawl_datetime(regs)
+    """
+    uncrawled = regs['gbif_crawl_datetime'].isna()
+    if any(uncrawled):
+        rows = regs[uncrawled].index.to_series() + 1
+        rows = rows.astype('string')
+        warnings.warn('Uncrawled registrations in rows: ' + ', '.join(rows))
+
+
+def validate_registrations_file(file_path):
+    """Checks registrations for any issues.
+
+    This is a wrapper to `check_completeness`, `check_local_dataset_id`,
+    `check_group_registrations`, `check_local_endpoints`, and
+    `check_crawl_datetime`.
 
     Parameters
     ----------
     file_path : str or pathlike object
         Path of the registrations file.
-    extended_checks : bool
-        Run extended checks? Extended checks are repository specific.
-        Extended checks are ignored by default. They can be customized by
-        editing the source code.
 
     Returns
     -------
@@ -135,32 +218,16 @@ def validate_registrations_file(file_path, extended_checks=False):
 
     Warns
     -----
-    Core checks
-        If local_dataset_id has not been crawled.
-    Extended checks
-        If local_dataset_id has an invalid format.
-        If local_dataset_id has an incorrect local_dataset_group_id.
-
-    See Also
-    --------
-    initialize_registrations_file
+    UserWarning
+        If registration issues are found.
 
     Examples
     --------
-    >>> validate_registrations('/Users/me/docs/registrations.csv')
-
-    With extended checks
-
-    >>> validate_registrations('/Users/me/docs/registrations.csv', extended_checks=TRUE)
+    >>> validate_registrations_file('tests/registrations.csv')
     """
     regs = read_registrations_file(file_path)
     check_completeness(regs)
     check_local_dataset_id(regs)
     check_group_registrations(regs)
-    # Local dataset ID and Local dataset endpoint are 1-to-1
     check_local_endpoints(regs)
-    # Has been crawled
-    if extended_checks:
-        pass
-    # Local dataset ID has correct format
-    # Local dataset ID has correct local dataset group ID
+    check_crawl_datetime(regs)
