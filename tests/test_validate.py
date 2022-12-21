@@ -10,7 +10,7 @@ from gbif_registrar import utilities
 @pytest.fixture
 def rgstrs():
     """Read the test registrations file into DataFrame fixture."""
-    df = utilities.read_registrations_file("tests/registrations.csv")
+    df = utilities.read_registrations("tests/registrations.csv")
     return df
 
 

@@ -3,7 +3,7 @@ import os.path
 import pandas as pd
 
 
-def initialize_registrations_file(file_path):
+def initialize_registrations(file_path):
     """Writes an empty registrations file to path.
 
     The registrations file is a map from datasets in the local repository, to
@@ -38,7 +38,7 @@ def initialize_registrations_file(file_path):
 
     Examples
     --------
-    >>> initialize_registrations_file('/Users/me/docs/registrations.csv')
+    >>> initialize_registrations('/Users/me/docs/registrations.csv')
     """
     if os.path.exists(file_path):
         pass
@@ -54,7 +54,7 @@ def initialize_registrations_file(file_path):
         df.to_csv(file_path, index=False, mode="x")
 
 
-def read_registrations_file(file_path):
+def read_registrations(file_path):
     """Reads the registrations file.
 
     Parameters
@@ -74,7 +74,7 @@ def read_registrations_file(file_path):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('/Users/me/docs/registrations.csv')
+    >>> rgstrs = read_registrations('/Users/me/docs/registrations.csv')
     """
     rgstrs = pd.read_csv(file_path, delimiter=",")
     rgstrs["gbif_crawl_datetime"] = pd.to_datetime(rgstrs["gbif_crawl_datetime"])

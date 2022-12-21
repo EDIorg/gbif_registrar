@@ -1,7 +1,7 @@
 """A module for validating the registrations file"""
 import warnings
 import pandas as pd
-from gbif_registrar.utilities import read_registrations_file
+from gbif_registrar.utilities import read_registrations
 from gbif_registrar.utilities import expected_cols
 
 
@@ -15,7 +15,7 @@ def check_completeness(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations_file` to
+        A dataframe of the registrations file. Use`read_registrations` to
         create this.
 
     Returns
@@ -29,7 +29,7 @@ def check_completeness(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_completeness(rgstrs)
     """
     rgstrs = rgstrs[expected_cols()].drop(["gbif_crawl_datetime"], axis=1)
@@ -49,7 +49,7 @@ def check_local_dataset_id(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations_file` to
+        A dataframe of the registrations file. Use`read_registrations` to
         create this.
 
     Returns
@@ -63,7 +63,7 @@ def check_local_dataset_id(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_local_dataset_id(rgstrs)
     """
     dupes = rgstrs["local_dataset_id"].duplicated()
@@ -96,7 +96,7 @@ def check_one_to_one_cardinality(df, col1, col2):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_one_to_one_cardinality( \
         df=rgstrs, col1='local_dataset_id', col2='local_dataset_endpoint' \
     )
@@ -125,7 +125,7 @@ def check_group_registrations(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations_file` to
+        A dataframe of the registrations file. Use`read_registrations` to
         create this.
 
     Returns
@@ -139,7 +139,7 @@ def check_group_registrations(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_group_registrations(rgstrs)
     """
     check_one_to_one_cardinality(
@@ -156,7 +156,7 @@ def check_local_endpoints(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations_file` to
+        A dataframe of the registrations file. Use`read_registrations` to
         create this.
 
     Returns
@@ -170,7 +170,7 @@ def check_local_endpoints(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_local_endpoints(rgstrs)
     """
     check_one_to_one_cardinality(
@@ -188,7 +188,7 @@ def check_crawl_datetime(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations_file` to
+        A dataframe of the registrations file. Use`read_registrations` to
         create this.
 
     Returns
@@ -201,7 +201,7 @@ def check_crawl_datetime(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations_file('tests/registrations.csv')
+    >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_crawl_datetime(rgstrs)
     """
     uncrawled = rgstrs["gbif_crawl_datetime"].isna()
@@ -236,7 +236,7 @@ def validate_registrations(file_path):
     --------
     >>> validate_registrations('tests/registrations.csv')
     """
-    rgstrs = read_registrations_file(file_path)
+    rgstrs = read_registrations(file_path)
     check_completeness(rgstrs)
     check_local_dataset_id(rgstrs)
     check_group_registrations(rgstrs)
