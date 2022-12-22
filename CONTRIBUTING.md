@@ -58,7 +58,7 @@ This package uses GitHub Actions continuous testing mechanism to ensure that the
 
 ## Style and Formatting
 
-This project uses [black](https://black.readthedocs.io/en/stable/) for code formatting, and [numpy](https://numpydoc.readthedocs.io/en/latest/format.html#style-guide) conventions for docstrings.
+This project uses [Black](https://black.readthedocs.io/en/stable/) for code formatting, and [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html#style-guide) conventions for docstrings.
 
 ## Get Started!
 
