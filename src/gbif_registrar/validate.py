@@ -234,11 +234,48 @@ def check_local_dataset_id_format(rgstrs):
     >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_local_dataset_id_format(rgstrs)
     """
-    ids = rgstrs['local_dataset_id']
-    bad_ids = ~ids.str.contains('^.+\\.\\d+\\.\\d+$')
+    ids = rgstrs["local_dataset_id"]
+    bad_ids = ~ids.str.contains(r"^.+\.\d+\.\d+$")
     if any(bad_ids):
         rows = ids[bad_ids].index.to_series() + 1
-        warnings.warn('Invalid local_dataset_id values in rows: ' + ', '.join(rows.astype('string')))
+        warnings.warn(
+            "Invalid local_dataset_id values in rows: "
+            + ", ".join(rows.astype("string"))
+        )
+
+
+def check_local_dataset_group_id_format(rgstrs):
+    """Check the format of the local_dataset_group_id.
+
+    rgstrs : pandas.DataFrame
+        A dataframe of the registrations file. Use`read_registrations` to
+        create this.
+
+    Returns
+    -------
+    None
+
+    Warns
+    -----
+    If local_dataset_group_id does not have the truncated data package ID
+    format used by the Environmental Data Initiative (EDI), i.e.
+    `scope.identifier`.
+
+    Examples
+    --------
+    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> check_local_dataset_group_id_format(rgstrs)
+    """
+    ids = rgstrs["local_dataset_id"]
+    expected_groups = ids.str.extract(r"(\D+\d+)")[0]
+    actual_groups = rgstrs["local_dataset_group_id"]
+    res = expected_groups.compare(actual_groups)
+    if len(res) > 0:
+        rows = res.index.to_series() + 1
+        warnings.warn(
+            "Invalid local_dataset_group_id values in rows: "
+            + ", ".join(rows.astype("string"))
+        )
 
 
 def validate_registrations(file_path, extended_checks=False):
@@ -279,3 +316,4 @@ def validate_registrations(file_path, extended_checks=False):
     check_crawl_datetime(rgstrs)
     if extended_checks:
         check_local_dataset_id_format(rgstrs)
+        check_local_dataset_group_id_format(rgstrs)
