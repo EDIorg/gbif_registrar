@@ -65,7 +65,8 @@ def test_check_one_to_one_cardinality_warn(rgstrs):
     """Each element in a one-to-one relationship should have only one
     corresponding value, or else a warning is issued."""
     rgstrs.loc[0, "local_dataset_id"] = rgstrs.loc[1, "local_dataset_id"]
-    rgstrs.loc[2, "local_dataset_endpoint"] = rgstrs.loc[3, "local_dataset_endpoint"]
+    rgstrs.loc[2, "local_dataset_endpoint"] = rgstrs.loc[
+        3, "local_dataset_endpoint"]
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         validate.check_one_to_one_cardinality(
@@ -92,4 +93,23 @@ def test_check_crawl_datetime_warn(rgstrs):
         warnings.simplefilter("always")
         validate.check_crawl_datetime(rgstrs)
         assert "Uncrawled registrations in rows" in str(w[0].message)
+        assert "1, 3" in str(w[0].message)
+
+
+def test_check_local_dataset_id_format_valid(rgstrs):
+    """The registrations file is valid, and doesn't throw a warning."""
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        validate.check_local_dataset_id_format(rgstrs)
+        assert len(w) == 0
+
+
+def test_check_local_dataset_id_format_warn(rgstrs):
+    """Malformed local dataset ID values issue a warning."""
+    rgstrs.loc[0, 'local_dataset_id'] = 'edi'
+    rgstrs.loc[2, 'local_dataset_id'] = 'knb-lter-msp.1'
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter('always')
+        validate.check_local_dataset_id_format(rgstrs)
+        assert 'Invalid local_dataset_id values in rows' in str(w[0].message)
         assert "1, 3" in str(w[0].message)
