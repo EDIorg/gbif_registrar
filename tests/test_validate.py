@@ -65,8 +65,7 @@ def test_check_one_to_one_cardinality_warn(rgstrs):
     """Each element in a one-to-one relationship should have only one
     corresponding value, or else a warning is issued."""
     rgstrs.loc[0, "local_dataset_id"] = rgstrs.loc[1, "local_dataset_id"]
-    rgstrs.loc[2, "local_dataset_endpoint"] = \
-        rgstrs.loc[3, "local_dataset_endpoint"]
+    rgstrs.loc[2, "local_dataset_endpoint"] = rgstrs.loc[3, "local_dataset_endpoint"]
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         validate.check_one_to_one_cardinality(
@@ -129,6 +128,5 @@ def test_check_local_dataset_group_id_format_warn(rgstrs):
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         validate.check_local_dataset_group_id_format(rgstrs)
-        assert "Invalid local_dataset_group_id values in rows" in \
-               str(w[0].message)
+        assert "Invalid local_dataset_group_id values in rows" in str(w[0].message)
         assert "1" in str(w[0].message)
