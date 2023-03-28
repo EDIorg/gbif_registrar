@@ -1,42 +1,63 @@
 name: ci-cd
 
 on:
+  push:
+    branches: [main, development]
   pull_request:
-    branches:
-      - main
-      - development
+    branches: [main, development]
 
 jobs:
+
   ci:
     # Set up operating system
     runs-on: ubuntu-latest
 
     # Define job steps
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.10"
+      # Set up job requirements
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Check-out repository
+      uses: actions/checkout@v2
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+    - name: Install package
+      run: poetry install
 
-      - name: Check-out repository
-        uses: actions/checkout@v2
+      # Format code and error on issues. This is an easy check to pass.
+    - uses: psf/black@stable
+      with:
+        jupyter: true
+        src: ./src
+    - uses: psf/black@stable
+      with:
+        jupyter: true
+        src: ./tests
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
+      # Analyze code but don't error on issues. This check encourages best
+      # practices and offers flexibility in adoption.
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+    - name: Install package
+      run: poetry install
+    - name: Analyze code with pylint
+      run: |
+        poetry run pylint src/ --exit-zero --disable=C0103
+        poetry run pylint tests/ --exit-zero --disable=C0103
 
-      - name: Install package
-        run: poetry install
+      # Test
+    - name: Test with pytest
+      run: poetry run pytest tests/ --cov=gbif_registrar --cov-report=xml
+    - name: Use Codecov to track coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml   # coverage report
 
-      - name: Test with pytest
-        run: poetry run pytest tests/ --cov=gbif_registrar --cov-report=xml
-
-      - name: Use Codecov to track coverage
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage.xml   # coverage report
-
-      - name: Build documentation
-        run: poetry run make html --directory docs/
+      # Build docs
+    - name: Build documentation
+      run: poetry run make html --directory docs/
 
   cd:
     # Only run this job if the "ci" job passes
@@ -50,30 +71,32 @@ jobs:
 
     # Define job steps
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.10"
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
 
-      - name: Check-out repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+    - name: Check-out repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
+    - name: Install poetry
+      uses: snok/install-poetry@v1
 
-      - name: Install package
-        run: poetry install
+    - name: Install package
+      run: poetry install
 
-      - name: Use Python Semantic Release to prepare release
-        env:
-          # This token is created automatically by GH Actions
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            poetry run semantic-release publish
+    - name: Use Python Semantic Release to prepare release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          poetry run semantic-release publish
+          git checkout development
+          git merge main
+          git push origin development
 
 #       - name: Publish to TestPyPI
 #         uses: pypa/gh-action-pypi-publish@release/v1
@@ -87,7 +110,7 @@ jobs:
 #             pip install \
 #             --index-url https://test.pypi.org/simple/ \
 #             --extra-index-url https://pypi.org/simple \
-#             gbif_registrar
+#             {{ cookiecutter.__package_slug }}
 
 #       - name: Publish to PyPI
 #         uses: pypa/gh-action-pypi-publish@release/v1
