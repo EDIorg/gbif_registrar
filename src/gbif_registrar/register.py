@@ -53,7 +53,7 @@ def register(file_path, local_dataset_id=None):
                     "gbif_dataset_uuid": None,
                     "gbif_endpoint_set_datetime": None,
                 },
-                index=[0]
+                index=[0],
             )
             rgstrs = pd.concat([rgstrs, new_row], ignore_index=True)
     # Call the complete_registrations function to complete the registration
@@ -121,7 +121,7 @@ def complete_registrations(rgstrs):
         if pd.isnull(row["gbif_dataset_uuid"]):
             gbif_dataset_uuid = get_gbif_dataset_uuid(
                 local_dataset_group_id=rgstrs.loc[index, "local_dataset_endpoint"],
-                rgstrs=rgstrs
+                rgstrs=rgstrs,
             )
             # Add the gbif_dataset_uuid value to the gbif_dataset_uuid column of
             # the rgstrs dataframe.
@@ -257,7 +257,7 @@ def request_gbif_dataset_uuid():
         data=json.dumps(data),
         auth=(config.username, config.password),
         headers=headers,
-        timeout=60
+        timeout=60,
     )
     # Send a warning if the request was not successful so that the user can
     # check the response and take appropriate action.
@@ -268,5 +268,7 @@ def request_gbif_dataset_uuid():
     else:
         dataset_response = create_dataset.json()
         gbif_uuid = dataset_response
-    gbif_uuid = str(uuid.uuid4())  # TODO Replace this stub once the GBIF API call is working
+    gbif_uuid = str(
+        uuid.uuid4()
+    )  # TODO Replace this stub once the GBIF API call is working
     return gbif_uuid
