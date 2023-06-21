@@ -4,6 +4,7 @@ import hashlib
 import pandas as pd
 from gbif_registrar.utilities import read_registrations
 from gbif_registrar.utilities import initialize_registrations
+from gbif_registrar.utilities import expected_cols
 
 
 def test_initialize_registrations_writes_to_path(tmp_path):
@@ -31,7 +32,7 @@ def test_initialize_registrations_has_expected_columns(tmp_path):
         "local_dataset_group_id",
         "local_dataset_endpoint",
         "gbif_dataset_uuid",
-        "gbif_crawl_datetime",
+        "gbif_endpoint_set_datetime",
     }
     f = tmp_path / "registrations.csv"
     initialize_registrations(f)
@@ -49,5 +50,17 @@ def test_read_registrations_reads_file():
 def test_read_registrations_formats_datetime():
     """Formats the datetime column."""
     rgstrs = read_registrations("tests/registrations.csv")
-    crawl_time = rgstrs["gbif_crawl_datetime"]
+    crawl_time = rgstrs["gbif_endpoint_set_datetime"]
     assert pd.core.dtypes.common.is_datetime64_dtype(crawl_time)
+
+
+def test_expected_cols_has_expected_cols():
+    """The expected_cols helper function has the expected column names."""
+    expected = [
+        "local_dataset_id",
+        "local_dataset_group_id",
+        "local_dataset_endpoint",
+        "gbif_dataset_uuid",
+        "gbif_endpoint_set_datetime",
+    ]
+    assert expected == expected_cols()

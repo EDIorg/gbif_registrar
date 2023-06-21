@@ -9,7 +9,7 @@ def check_completeness(rgstrs):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
-    `gbif_crawl_datetime`, which is not essential for initiating a GBIF
+    `gbif_endpoint_set_datetime`, which is not essential for initiating a GBIF
     crawl.
 
     Parameters
@@ -26,13 +26,8 @@ def check_completeness(rgstrs):
     -----
     UserWarning
         If any registrations are incomplete.
-
-    Examples
-    --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
-    >>> check_completeness(rgstrs)
     """
-    rgstrs = rgstrs[expected_cols()].drop(["gbif_crawl_datetime"], axis=1)
+    rgstrs = rgstrs[expected_cols()].drop(["gbif_endpoint_set_datetime"], axis=1)
     rgstrs = rgstrs[rgstrs.isna().any(axis=1)]
     if len(rgstrs) > 0:
         rows = rgstrs.index.to_series() + 1
@@ -183,7 +178,7 @@ def check_crawl_datetime(rgstrs):
 
     Registrations contain all the information needed for GBIF to successfully
     crawl the corresponding dataset and post to the GBIF data portal. Datetime
-    values in the `gbif_crawl_datetime` indicate the dataset has been crawled.
+    values in the `gbif_endpoint_set_datetime` indicate the dataset has been crawled.
 
     Parameters
     ----------
@@ -204,7 +199,7 @@ def check_crawl_datetime(rgstrs):
     >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_crawl_datetime(rgstrs)
     """
-    uncrawled = rgstrs["gbif_crawl_datetime"].isna()
+    uncrawled = rgstrs["gbif_endpoint_set_datetime"].isna()
     if any(uncrawled):
         rows = rgstrs[uncrawled].index.to_series() + 1
         rows = rows.astype("string")

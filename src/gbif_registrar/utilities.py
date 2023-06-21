@@ -23,7 +23,7 @@ def initialize_registrations(file_path):
     - `gbif_dataset_uuid`: The registration identifier assigned by GBIF to the
       local dataset group. This has a one-to-one relationship with
       `local_dataset_group_id`.
-    - `gbif_crawl_datetime`: The datetime GBIF crawled the
+    - `gbif_endpoint_set_datetime`: The datetime GBIF crawled the
       `local_dataset_endpoint`.
 
     Parameters
@@ -35,10 +35,6 @@ def initialize_registrations(file_path):
     -------
     None
         The registrations file as a .csv.
-
-    Examples
-    --------
-    >>> initialize_registrations('/Users/me/docs/registrations.csv')
     """
     if os.path.exists(file_path):
         pass
@@ -48,7 +44,7 @@ def initialize_registrations(file_path):
             "local_dataset_group_id",
             "local_dataset_endpoint",
             "gbif_dataset_uuid",
-            "gbif_crawl_datetime",
+            "gbif_endpoint_set_datetime"
         ]
         df = pd.DataFrame(columns=cols)
         df.to_csv(file_path, index=False, mode="x")
@@ -65,19 +61,16 @@ def read_registrations(file_path):
     Returns
     -------
     DataFrame
-        Pandas dataframe with the gbif_crawl_datetime column formatted as
+        Pandas dataframe with the gbif_endpoint_set_datetime column formatted as
         datetime.
 
     See Also
     --------
     check_registrations_file
-
-    Examples
-    --------
-    >>> rgstrs = read_registrations('/Users/me/docs/registrations.csv')
     """
     rgstrs = pd.read_csv(file_path, delimiter=",")
-    rgstrs["gbif_crawl_datetime"] = pd.to_datetime(rgstrs["gbif_crawl_datetime"])
+    rgstrs["gbif_endpoint_set_datetime"] = pd.to_datetime(
+        rgstrs["gbif_endpoint_set_datetime"])
     return rgstrs
 
 
@@ -88,6 +81,6 @@ def expected_cols():
         "local_dataset_group_id",
         "local_dataset_endpoint",
         "gbif_dataset_uuid",
-        "gbif_crawl_datetime",
+        "gbif_endpoint_set_datetime",
     ]
     return cols

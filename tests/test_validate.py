@@ -86,8 +86,8 @@ def test_check_crawl_datetime_valid(rgstrs):
 
 def test_check_crawl_datetime_warn(rgstrs):
     """Uncrawled registrations result in a warning."""
-    rgstrs.loc[0, "gbif_crawl_datetime"] = np.nan
-    rgstrs.loc[2, "gbif_crawl_datetime"] = np.nan
+    rgstrs.loc[0, "gbif_endpoint_set_datetime"] = np.nan
+    rgstrs.loc[2, "gbif_endpoint_set_datetime"] = np.nan
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         validate.check_crawl_datetime(rgstrs)
