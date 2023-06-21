@@ -44,7 +44,7 @@ def initialize_registrations(file_path):
             "local_dataset_group_id",
             "local_dataset_endpoint",
             "gbif_dataset_uuid",
-            "gbif_endpoint_set_datetime"
+            "gbif_endpoint_set_datetime",
         ]
         df = pd.DataFrame(columns=cols)
         df.to_csv(file_path, index=False, mode="x")
@@ -70,7 +70,8 @@ def read_registrations(file_path):
     """
     rgstrs = pd.read_csv(file_path, delimiter=",")
     rgstrs["gbif_endpoint_set_datetime"] = pd.to_datetime(
-        rgstrs["gbif_endpoint_set_datetime"])
+        rgstrs["gbif_endpoint_set_datetime"]
+    )
     return rgstrs
 
 

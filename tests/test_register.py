@@ -50,14 +50,15 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
     res = get_local_dataset_endpoint(local_dataset_id)
-    expected = "https://pasta.lternet.edu/package/docs/api#GET%20:%20/" + \
-               "download/eml/" + \
-               "edi/929/2"
+    expected = (
+        "https://pasta.lternet.edu/package/docs/api#GET%20:%20/"
+        + "download/eml/"
+        + "edi/929/2"
+    )
     assert res == expected
 
 
-def test_get_gbif_dataset_uuid(local_dataset_id, local_dataset_group_id,
-                               rgstrs):
+def test_get_gbif_dataset_uuid(rgstrs):
     """Test get_gbif_dataset_uuid() function.
 
     The expected value is a UUID string, which is returned in both cases on
@@ -107,34 +108,34 @@ def test_register(local_dataset_id, tmp_path):
     # resultant registrations file should have a new row containing the local
     # data set ID along with a unique GBIF registration number.
     register(
-        file_path=tmp_path / "registrations.csv",
-        local_dataset_id=local_dataset_id
+        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
     )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
-    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] not in set(rgstrs_initial["gbif_dataset_uuid"])
+    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] not in set(
+        rgstrs_initial["gbif_dataset_uuid"]
+    )
 
     # Case 2: A new data set failed during a previous registration attempt and
     # the function is being run again to fix this.
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register(
-        file_path=tmp_path / "registrations.csv",
-        local_dataset_id=local_dataset_id
+        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
     )
     rgstrs_initial = read_registrations(tmp_path / "registrations.csv")
     rgstrs_initial.iloc[-1, -4:] = None
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register(
-        file_path=tmp_path / "registrations.csv",
-        local_dataset_id=local_dataset_id
+        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
     )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] not in set(
-        rgstrs_initial["gbif_dataset_uuid"])
+        rgstrs_initial["gbif_dataset_uuid"]
+    )
     # The last 3 columns of the last row should not be None. The datetime is
     # the only column that should be None because it hasn't been crawled yet.
     assert rgstrs_final.iloc[-2, -4:].notnull().all()
@@ -143,10 +144,7 @@ def test_register(local_dataset_id, tmp_path):
     # sets are fully registered. The regsitration files should be unchanged.
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
-    register(
-        file_path=tmp_path / "registrations.csv"
-    )
+    register(file_path=tmp_path / "registrations.csv")
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.equals(rgstrs_initial)
-

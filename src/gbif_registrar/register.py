@@ -1,9 +1,9 @@
 """Functions for registering datasets with GBIF."""
-import requests
 import json
 import uuid
+import requests
 import pandas as pd
-import gbif_registrar.config as config
+from gbif_registrar import config
 from gbif_registrar.utilities import read_registrations
 
 
@@ -45,24 +45,24 @@ def register(file_path, local_dataset_id=None):
         # the local_dataset_id column. The other columns should be empty at this
         # point.
         if local_dataset_id is not None:
-            rgstrs = rgstrs.append(
+            new_row = pd.DataFrame(
                 {
                     "local_dataset_id": local_dataset_id,
                     "local_dataset_group_id": None,
                     "local_dataset_endpoint": None,
                     "gbif_dataset_uuid": None,
-                    "gbif_endpoint_set_datetime": None
+                    "gbif_endpoint_set_datetime": None,
                 },
-                ignore_index=True
+                index=[0]
             )
+            rgstrs = pd.concat([rgstrs, new_row], ignore_index=True)
     # Call the complete_registrations function to complete the registration
-    rgstrs = complete_registrations(rgstrs, local_dataset_id)
+    rgstrs = complete_registrations(rgstrs)
     # Write the completed registrations file to the file path parameter
     rgstrs.to_csv(file_path, index=False, mode="w")
-    return None
 
 
-def complete_registrations(rgstrs, local_dataset_id=None):
+def complete_registrations(rgstrs):
     """Complete the registration of a local_dataset_id with GBIF.
 
     Parameters
@@ -70,10 +70,6 @@ def complete_registrations(rgstrs, local_dataset_id=None):
     rgstrs : DataFrame
         Pandas dataframe with the gbif_endpoint_set_datetime column formatted as
         datetime.
-    local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF. Run with
-        local_dataset_id argument when registering for the first time, or run
-        with local_dataset_id=None to fix incomplete registrations.
 
     Returns
     -------
@@ -85,10 +81,10 @@ def complete_registrations(rgstrs, local_dataset_id=None):
     # gbif_endpoint_set_datetime contain empty values. These are the rows
     # that need to be completed.
     record = rgstrs[
-        (rgstrs["local_dataset_group_id"].isnull()) |
-        (rgstrs["local_dataset_endpoint"].isnull()) |
-        (rgstrs["gbif_dataset_uuid"].isnull()) |
-        (rgstrs["gbif_endpoint_set_datetime"].isnull())
+        (rgstrs["local_dataset_group_id"].isnull())
+        | (rgstrs["local_dataset_endpoint"].isnull())
+        | (rgstrs["gbif_dataset_uuid"].isnull())
+        | (rgstrs["gbif_endpoint_set_datetime"].isnull())
     ]
     # If the record dataframe is empty, then there are no rows to complete.
     # Return the rgstrs dataframe.
@@ -124,7 +120,6 @@ def complete_registrations(rgstrs, local_dataset_id=None):
         # insert it into the gbif_dataset_uuid column of the rgstrs dataframe.
         if pd.isnull(row["gbif_dataset_uuid"]):
             gbif_dataset_uuid = get_gbif_dataset_uuid(
-                local_dataset_id=row["local_dataset_id"],
                 local_dataset_group_id=rgstrs.loc[index, "local_dataset_endpoint"],
                 rgstrs=rgstrs
             )
@@ -177,7 +172,7 @@ def get_local_dataset_endpoint(local_dataset_id):
     return local_dataset_id
 
 
-def get_gbif_dataset_uuid(local_dataset_id, local_dataset_group_id, rgstrs):
+def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
     """Get the gbif_dataset_uuid value.
 
     Parameters
@@ -217,26 +212,19 @@ def get_gbif_dataset_uuid(local_dataset_id, local_dataset_group_id, rgstrs):
     if local_dataset_group_id in rgstrs["local_dataset_group_id"].values:
         gbif_dataset_uuid = rgstrs.loc[
             rgstrs["local_dataset_group_id"] == local_dataset_group_id,
-            "gbif_dataset_uuid"
+            "gbif_dataset_uuid",
         ].iloc[0]
     # If there is no matching local_dataset_group_id value, or if there is a
     # matching local_dataset_group_id value but it has an empty
     # gbif_dataset_uuid value, then call the register_dataset function to
     # register the dataset with GBIF and get the gbif_dataset_uuid value.
     else:
-        gbif_dataset_uuid = request_gbif_dataset_uuid(
-            local_dataset_id=local_dataset_id
-        )
+        gbif_dataset_uuid = request_gbif_dataset_uuid()
     return gbif_dataset_uuid
 
 
-def request_gbif_dataset_uuid(local_dataset_id):
+def request_gbif_dataset_uuid():
     """Request a gbif_dataset_uuid value from GBIF.
-
-    Parameters
-    ----------
-    local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF.
 
     Returns
     -------
@@ -261,23 +249,24 @@ def request_gbif_dataset_uuid(local_dataset_id):
         "installationKey": config.installation,
         "publishingOrganizationKey": config.organization,
         "type": "SAMPLING_EVENT",
-        "title": title
+        "title": title,
     }
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
     create_dataset = requests.post(
         url=gbif_endpoint,
         data=json.dumps(data),
         auth=(config.username, config.password),
-        headers=headers
+        headers=headers,
+        timeout=60
     )
     # Send a warning if the request was not successful so that the user can
     # check the response and take appropriate action.
     if create_dataset.status_code != 200:
-        # print("Warning: GBIF dataset registration request failed.")  # FIXME: Declare an exception for better message handling.
+        # FIXME: Declare an exception for better message handling.
+        # print("Warning: GBIF dataset registration request failed.")
         gbif_uuid = None
     else:
         dataset_response = create_dataset.json()
         gbif_uuid = dataset_response
-    return str(uuid.uuid4()) # TODO Replace this stub once the GBIF API call is working
-    # return gbif_uuid
-
+    gbif_uuid = str(uuid.uuid4())  # TODO Replace this stub once the GBIF API call is working
+    return gbif_uuid
