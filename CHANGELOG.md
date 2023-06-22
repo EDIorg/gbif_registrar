@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.1 (2023-06-22)
+
+
 ## v0.1.0 (2023-06-22)
 ### Feature
 * Create function to register datasets w/GBIF ([`3cd7d14`](https://github.com/clnsmth/gbif_registrar/commit/3cd7d14e5876fd17f5071569e37e50585b3ad3ee))
