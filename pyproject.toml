@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gbif_registrar"
-version = "0.0.0"
+version = "0.1.0"
 description = "For registering EDI data packages with GBIF"
 authors = [
     "Colin Smith <colin.smith@wisc.edu>",
