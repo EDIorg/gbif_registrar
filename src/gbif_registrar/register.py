@@ -167,7 +167,7 @@ def get_local_dataset_endpoint(local_dataset_id):
     scope = local_dataset_id.split(".")[0]
     identifier = local_dataset_id.split(".")[1]
     revision = local_dataset_id.split(".")[2]
-    base_url = "https://pasta.lternet.edu/package/docs/api#GET%20:%20/download/eml/"
+    base_url = "https://pasta.lternet.edu/package/download/eml/"
     local_dataset_id = base_url + scope + "/" + identifier + "/" + revision
     return local_dataset_id
 
@@ -244,7 +244,7 @@ def request_gbif_dataset_uuid():
     #  presumably static nature of GBIFS dataset UUID identifier and EDIs
     #  usage of it.
     title = "Placeholder title, to be written over by EML metadata from EDI"
-    gbif_endpoint = "http://api.gbif-uat.org/v1/dataset"
+    gbif_endpoint = "http://api.gbif-uat.org/v1/dataset"  # FIXME: This is the test endpoing. Should eventually be production.
     data = {
         "installationKey": config.installation,
         "publishingOrganizationKey": config.organization,
@@ -261,14 +261,15 @@ def request_gbif_dataset_uuid():
     )
     # Send a warning if the request was not successful so that the user can
     # check the response and take appropriate action.
-    if create_dataset.status_code != 200:
+    if create_dataset.status_code != 201:
         # FIXME: Declare an exception for better message handling.
-        # print("Warning: GBIF dataset registration request failed.")
+        print("Warning: GBIF dataset registration request failed.")
         gbif_uuid = None
     else:
         dataset_response = create_dataset.json()
         gbif_uuid = dataset_response
-    gbif_uuid = str(
-        uuid.uuid4()
-    )  # TODO Replace this stub once the GBIF API call is working
+    # # TODO: Stub out this test for offline testing.
+    # gbif_uuid = str(
+    #     uuid.uuid4()
+    # )
     return gbif_uuid

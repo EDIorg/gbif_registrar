@@ -5,6 +5,7 @@ from gbif_registrar.register import get_local_dataset_group_id
 from gbif_registrar.register import get_local_dataset_endpoint
 from gbif_registrar.register import get_gbif_dataset_uuid
 from gbif_registrar.register import register
+from gbif_registrar.register import request_gbif_dataset_uuid
 
 
 @pytest.fixture
@@ -84,10 +85,12 @@ def test_request_gbif_dataset_uuid(local_dataset_id):
     The expected value is a UUID string on success or None in the case of a
     failed HTTP request."""
     # Case 1: UUID is returned.
-    # res = request_gbif_dataset_uuid(local_dataset_id)
+    res = request_gbif_dataset_uuid()
+    assert type(res) == str
+    assert type(res) is not None
     # Case 2: HTTP request fails.
     # TODO: Stub out the GBIF API call to test this case.
-    assert True
+    # res = request_gbif_dataset_uuid()
 
 
 def test_register(local_dataset_id, tmp_path):
