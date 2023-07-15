@@ -44,9 +44,14 @@ def initiate_crawl(local_dataset_endpoint, gbif_dataset_uuid):
 
 
 def post_metadata_document(gbif_dataset_uuid, local_dataset_endpoint):
-    my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
 
-    # TODO: Try posting the metadata document to the dataset.
+    # Read metadata document from PASTA
+    meta_request = requests.get(
+        "https://pasta.lternet.edu/package/metadata/eml/edi/941/4"
+    )
+
+    # Post metadata document to GBIF
+    my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
     metadata = requests.post(
         gbif_api + "/" + gbif_dataset_uuid + "/document",
         data=json.dumps(my_endpoint),
