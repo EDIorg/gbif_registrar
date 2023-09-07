@@ -5,6 +5,7 @@ from gbif_registrar.register import get_local_dataset_group_id
 from gbif_registrar.register import get_local_dataset_endpoint
 from gbif_registrar.register import get_gbif_dataset_uuid
 from gbif_registrar.register import register
+from gbif_registrar.register import request_gbif_dataset_uuid
 
 
 @pytest.fixture
@@ -50,11 +51,7 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
     res = get_local_dataset_endpoint(local_dataset_id)
-    expected = (
-        "https://pasta.lternet.edu/package/docs/api#GET%20:%20/"
-        + "download/eml/"
-        + "edi/929/2"
-    )
+    expected = "https://pasta.lternet.edu/package/download/eml/edi/929/2"
     assert res == expected
 
 
@@ -84,10 +81,12 @@ def test_request_gbif_dataset_uuid(local_dataset_id):
     The expected value is a UUID string on success or None in the case of a
     failed HTTP request."""
     # Case 1: UUID is returned.
-    # res = request_gbif_dataset_uuid(local_dataset_id)
+    res = request_gbif_dataset_uuid()
+    assert type(res) == str
+    assert type(res) is not None
     # Case 2: HTTP request fails.
     # TODO: Stub out the GBIF API call to test this case.
-    assert True
+    # res = request_gbif_dataset_uuid()
 
 
 def test_register(local_dataset_id, tmp_path):
@@ -138,7 +137,7 @@ def test_register(local_dataset_id, tmp_path):
     )
     # The last 3 columns of the last row should not be None. The datetime is
     # the only column that should be None because it hasn't been crawled yet.
-    assert rgstrs_final.iloc[-2, -4:].notnull().all()
+    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
     # Case 3: A new data set is not being registered, and all existing data
     # sets are fully registered. The regsitration files should be unchanged.
