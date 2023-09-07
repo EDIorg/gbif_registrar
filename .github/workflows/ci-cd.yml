@@ -44,8 +44,8 @@ jobs:
       run: poetry install
     - name: Analyze code with pylint
       run: |
-        poetry run pylint src/ --exit-zero --disable=C0103
-        poetry run pylint tests/ --exit-zero --disable=C0103
+        poetry run pylint src/ --exit-zero
+        poetry run pylint tests/ --exit-zero
 
       # Test
     - name: Test with pytest
@@ -80,6 +80,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        token: RELEASE_TOKEN
 
     - name: Install poetry
       uses: snok/install-poetry@v1
@@ -88,8 +89,6 @@ jobs:
       run: poetry install
 
     - name: Use Python Semantic Release to prepare release
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
