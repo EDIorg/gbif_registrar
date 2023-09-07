@@ -1,6 +1,8 @@
 """Miscellaneous utilities"""
 import os.path
 import pandas as pd
+from requests import get
+from gbif_registrar.config import local_environment
 
 
 def initialize_registrations(file_path):
@@ -85,3 +87,31 @@ def expected_cols():
         "gbif_endpoint_set_datetime",
     ]
     return cols
+
+
+def read_local_dataset_metadata(local_dataset_id):
+    """Reads the metadata document for a local dataset.
+
+    Parameters
+    ----------
+    local_dataset_id : str
+        The identifier of the dataset in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
+
+    Returns
+    -------
+    str
+        The metadata document for the local dataset in XML format.
+    """
+    # Build URL for metadata document to be read
+    metadata_url = local_environment + \
+                   "/package/metadata/eml/" + \
+                   local_dataset_id.split(".")[0] + "/" + \
+                   local_dataset_id.split(".")[1] + "/" + \
+                   local_dataset_id.split(".")[2]
+
+    # Read metadata document and convert to string for return
+    resp = get(metadata_url)
+    resp.raise_for_status()
+    return resp.text
+
