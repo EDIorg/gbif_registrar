@@ -30,9 +30,15 @@ def initiate_crawl(local_dataset_endpoint, gbif_dataset_uuid, local_dataset_id):
     # Notify user of the dataset being crawled and provide link to the dataset
     # registry for details and troubleshooting.
     dataset_registry_url = registry_header + "/" + gbif_dataset_uuid
-    print("Initiating crawl for EDI dataset '" + local_dataset_id +
-          "' / GBIF dataset '" + gbif_dataset_uuid + "'. See GBIF Registry " +
-          "for details:\n" + dataset_registry_url)
+    print(
+        "Initiating crawl for EDI dataset '"
+        + local_dataset_id
+        + "' / GBIF dataset '"
+        + gbif_dataset_uuid
+        + "'. See GBIF Registry "
+        + "for details:\n"
+        + dataset_registry_url
+    )
 
     # Clear the list of local endpoints so when the endpoint is added below,
     # it will result in only one being listed on the GBIF dataset landing page.
@@ -76,7 +82,7 @@ def post_new_metadata_document(gbif_dataset_uuid, local_dataset_id):
         gbif_api + "/" + gbif_dataset_uuid + "/document",
         data=metadata,
         auth=(username, password),
-        headers={'Content-Type': 'application/xml'}
+        headers={"Content-Type": "application/xml"},
     )
     resp.raise_for_status()
     return None
@@ -104,7 +110,7 @@ def post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
         gbif_api + "/" + gbif_dataset_uuid + "/endpoint",
         data=json.dumps(my_endpoint),
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={"Content-Type": "application/json"},
     )
     resp.raise_for_status()
     # TODO: Add datetime to log if successful.
@@ -128,7 +134,7 @@ def delete_local_dataset_endpoints(gbif_dataset_uuid):
     endpoints = get(
         gbif_api + "/" + gbif_dataset_uuid + "/endpoint",
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={"Content-Type": "application/json"},
     )
     endpoints.raise_for_status()
 
@@ -139,7 +145,7 @@ def delete_local_dataset_endpoints(gbif_dataset_uuid):
             resp = delete(
                 gbif_api + "/" + gbif_dataset_uuid + "/endpoint/" + str(key),
                 auth=(username, password),
-                headers={'Content-Type': 'application/json'}
+                headers={"Content-Type": "application/json"},
             )
             resp.raise_for_status()
     return None

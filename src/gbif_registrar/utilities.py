@@ -104,14 +104,17 @@ def read_local_dataset_metadata(local_dataset_id):
         The metadata document for the local dataset in XML format.
     """
     # Build URL for metadata document to be read
-    metadata_url = local_environment + \
-                   "/package/metadata/eml/" + \
-                   local_dataset_id.split(".")[0] + "/" + \
-                   local_dataset_id.split(".")[1] + "/" + \
-                   local_dataset_id.split(".")[2]
+    metadata_url = (
+        local_environment
+        + "/package/metadata/eml/"
+        + local_dataset_id.split(".")[0]
+        + "/"
+        + local_dataset_id.split(".")[1]
+        + "/"
+        + local_dataset_id.split(".")[2]
+    )
 
     # Read metadata document and convert to string for return
     resp = get(metadata_url)
     resp.raise_for_status()
     return resp.text
-
