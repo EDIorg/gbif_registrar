@@ -51,11 +51,7 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
     res = get_local_dataset_endpoint(local_dataset_id)
-    expected = (
-        "https://pasta.lternet.edu/package/docs/api#GET%20:%20/"
-        + "download/eml/"
-        + "edi/929/2"
-    )
+    expected = "https://pasta.lternet.edu/package/download/eml/edi/929/2"
     assert res == expected
 
 
@@ -141,7 +137,7 @@ def test_register(local_dataset_id, tmp_path):
     )
     # The last 3 columns of the last row should not be None. The datetime is
     # the only column that should be None because it hasn't been crawled yet.
-    assert rgstrs_final.iloc[-2, -4:].notnull().all()
+    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
     # Case 3: A new data set is not being registered, and all existing data
     # sets are fully registered. The regsitration files should be unchanged.
