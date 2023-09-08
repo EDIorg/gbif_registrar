@@ -2,7 +2,7 @@
 import os.path
 import pandas as pd
 from requests import get
-from gbif_registrar.config import local_environment
+from gbif_registrar.config import PASTA_ENVIRONMENT
 
 
 def initialize_registrations(file_path):
@@ -41,15 +41,8 @@ def initialize_registrations(file_path):
     if os.path.exists(file_path):
         pass
     else:
-        cols = [
-            "local_dataset_id",
-            "local_dataset_group_id",
-            "local_dataset_endpoint",
-            "gbif_dataset_uuid",
-            "gbif_endpoint_set_datetime",
-        ]
-        df = pd.DataFrame(columns=cols)
-        df.to_csv(file_path, index=False, mode="x")
+        data = pd.DataFrame(columns=expected_cols())
+        data.to_csv(file_path, index=False, mode="x")
 
 
 def read_registrations(file_path):
@@ -105,7 +98,7 @@ def read_local_dataset_metadata(local_dataset_id):
     """
     # Build URL for metadata document to be read
     metadata_url = (
-        local_environment
+        PASTA_ENVIRONMENT
         + "/package/metadata/eml/"
         + local_dataset_id.split(".")[0]
         + "/"
@@ -115,6 +108,6 @@ def read_local_dataset_metadata(local_dataset_id):
     )
 
     # Read metadata document and convert to string for return
-    resp = get(metadata_url)
+    resp = get(metadata_url, timeout=60)
     resp.raise_for_status()
     return resp.text

@@ -2,7 +2,7 @@
 
 import json
 from requests import post, get, delete
-from gbif_registrar.config import username, password, gbif_api, registry_header
+from gbif_registrar.config import USER_NAME, PASSWORD, GBIF_API, REGISTRY_BASE_URL
 from gbif_registrar.utilities import read_local_dataset_metadata
 
 
@@ -29,7 +29,7 @@ def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
     """
     # Notify user of the dataset being crawled and provide link to the dataset
     # registry for details and troubleshooting.
-    dataset_registry_url = registry_header + "/" + gbif_dataset_uuid
+    dataset_registry_url = REGISTRY_BASE_URL + "/" + gbif_dataset_uuid
     print(
         "Initiating crawl for EDI dataset '"
         + local_dataset_id
@@ -53,11 +53,7 @@ def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
     # Post a new metadata document to update the GBIF landing page. This is
     # necessary because GBIF doesn't "re-crawl" the local dataset metadata when
     # the new local dataset endpoint is updated.
-    # TODO: Call if is an update, not a new dataset?
     post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
-
-    # TODO: Add datetime to log if successful.
-    return None
 
 
 def post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
@@ -79,13 +75,13 @@ def post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
     """
     metadata = read_local_dataset_metadata(local_dataset_id)
     resp = post(
-        gbif_api + "/" + gbif_dataset_uuid + "/document",
+        GBIF_API + "/" + gbif_dataset_uuid + "/document",
         data=metadata,
-        auth=(username, password),
+        auth=(USER_NAME, PASSWORD),
         headers={"Content-Type": "application/xml"},
+        timeout=60,
     )
     resp.raise_for_status()
-    return None
 
 
 def post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
@@ -107,14 +103,13 @@ def post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
         Will raise an exception if the POST fails."""
     my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
     resp = post(
-        gbif_api + "/" + gbif_dataset_uuid + "/endpoint",
+        GBIF_API + "/" + gbif_dataset_uuid + "/endpoint",
         data=json.dumps(my_endpoint),
-        auth=(username, password),
+        auth=(USER_NAME, PASSWORD),
         headers={"Content-Type": "application/json"},
+        timeout=60,
     )
     resp.raise_for_status()
-    # TODO: Add datetime to log if successful.
-    return None
 
 
 def delete_local_dataset_endpoints(gbif_dataset_uuid):
@@ -132,9 +127,10 @@ def delete_local_dataset_endpoints(gbif_dataset_uuid):
     """
     # Get the list of existing endpoints to delete
     endpoints = get(
-        gbif_api + "/" + gbif_dataset_uuid + "/endpoint",
-        auth=(username, password),
+        GBIF_API + "/" + gbif_dataset_uuid + "/endpoint",
+        auth=(USER_NAME, PASSWORD),
         headers={"Content-Type": "application/json"},
+        timeout=60,
     )
     endpoints.raise_for_status()
 
@@ -143,9 +139,9 @@ def delete_local_dataset_endpoints(gbif_dataset_uuid):
         for item in endpoints.json():
             key = item.get("key")
             resp = delete(
-                gbif_api + "/" + gbif_dataset_uuid + "/endpoint/" + str(key),
-                auth=(username, password),
+                GBIF_API + "/" + gbif_dataset_uuid + "/endpoint/" + str(key),
+                auth=(USER_NAME, PASSWORD),
                 headers={"Content-Type": "application/json"},
+                timeout=60,
             )
             resp.raise_for_status()
-    return None
