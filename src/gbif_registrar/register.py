@@ -1,9 +1,14 @@
 """Functions for registering datasets with GBIF."""
 import json
-import uuid
 import requests
 import pandas as pd
-from gbif_registrar import config
+from gbif_registrar.config import (
+    GBIF_API,
+    INSTALLATION,
+    ORGANIZATION,
+    PASSWORD,
+    USER_NAME,
+)
 from gbif_registrar.utilities import read_registrations
 
 
@@ -237,39 +242,20 @@ def request_gbif_dataset_uuid():
     The gbif_dataset_uuid value is an arbitrary UUID value generated and
     returned by the GBIF server.
     """
-    # TODO: Get title from EML metadata? The request for this information by
-    #  GBIF suggests that they are expecting the title to be a static value,
-    #  where in fact, EDI's dataset title value can change across versions
-    #  within a series. This presents a potential conflict between the
-    #  presumably static nature of GBIFS dataset UUID identifier and EDIs
-    #  usage of it.
     title = "Placeholder title, to be written over by EML metadata from EDI"
-    gbif_endpoint = "http://api.gbif-uat.org/v1/dataset"  # FIXME: This is the test endpoing. Should eventually be production.
     data = {
-        "installationKey": config.installation,
-        "publishingOrganizationKey": config.organization,
+        "installationKey": INSTALLATION,
+        "publishingOrganizationKey": ORGANIZATION,
         "type": "SAMPLING_EVENT",
         "title": title,
     }
     headers = {"Content-Type": "application/json"}
-    create_dataset = requests.post(
-        url=gbif_endpoint,
+    resp = requests.post(
+        url=GBIF_API,
         data=json.dumps(data),
-        auth=(config.username, config.password),
+        auth=(USER_NAME, PASSWORD),
         headers=headers,
         timeout=60,
     )
-    # Send a warning if the request was not successful so that the user can
-    # check the response and take appropriate action.
-    if create_dataset.status_code != 201:
-        # FIXME: Declare an exception for better message handling.
-        print("Warning: GBIF dataset registration request failed.")
-        gbif_uuid = None
-    else:
-        dataset_response = create_dataset.json()
-        gbif_uuid = dataset_response
-    # # TODO: Stub out this test for offline testing.
-    # gbif_uuid = str(
-    #     uuid.uuid4()
-    # )
-    return gbif_uuid
+    resp.raise_for_status()
+    return resp.json()

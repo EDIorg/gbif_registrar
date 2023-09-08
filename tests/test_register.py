@@ -8,20 +8,18 @@ from gbif_registrar.register import register
 from gbif_registrar.register import request_gbif_dataset_uuid
 
 
-@pytest.fixture
-def rgstrs():
+@pytest.fixture(name="rgstrs")
+def rgstrs_fixture():
     """Read the test registrations file into DataFrame fixture."""
-    rgstrs = read_registrations("tests/registrations.csv")
-    return rgstrs
+    return read_registrations("tests/registrations.csv")
 
 
-@pytest.fixture
-def local_dataset_id():
+@pytest.fixture(name="local_dataset_id")
+def local_dataset_id_fixture():
     """Create a local_dataset_id fixture for tests."""
     # This local_dataset_id corresponds to a data package archived on EDI and
     # formatted according to the DwCA-Event core.
-    local_dataset_id = "edi.929.2"
-    return local_dataset_id
+    return "edi.929.2"
 
 
 @pytest.fixture
@@ -31,8 +29,7 @@ def local_dataset_group_id():
     # EDI and formatted according to the DwCA-Event core. This value is
     # derived from the local_dataset_id fixture and should be the same as the
     # local_dataset_id with the version number removed.
-    local_dataset_group_id = "edi.929"
-    return local_dataset_group_id
+    return "edi.929"
 
 
 def test_get_local_dataset_group_id(local_dataset_id):
@@ -75,15 +72,15 @@ def test_get_gbif_dataset_uuid(rgstrs):
     # res = get_gbif_dataset_uuid(local_dataset_group_id, rgstrs)
 
 
-def test_request_gbif_dataset_uuid(local_dataset_id):
+def test_request_gbif_dataset_uuid():
     """Test request_gbif_dataset_uuid() function.
 
     The expected value is a UUID string on success or None in the case of a
     failed HTTP request."""
     # Case 1: UUID is returned.
     res = request_gbif_dataset_uuid()
-    assert type(res) == str
-    assert type(res) is not None
+    assert isinstance(res, str)
+    assert res is not None
     # Case 2: HTTP request fails.
     # TODO: Stub out the GBIF API call to test this case.
     # res = request_gbif_dataset_uuid()

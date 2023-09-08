@@ -68,14 +68,14 @@ def check_local_dataset_id(rgstrs):
         warnings.warn("Duplicate local_dataset_id values in rows: " + ", ".join(dupes))
 
 
-def check_one_to_one_cardinality(df, col1, col2):
+def check_one_to_one_cardinality(data, col1, col2):
     """Check for one-to-one cardinality between two columns of a dataframe.
 
     This is a helper function used in a couple registration checks.
 
     Parameters
     ----------
-    df : pandas.DataFrame
+    data : pandas.DataFrame
     col1 : str
         Column name
     col2 : str
@@ -93,11 +93,11 @@ def check_one_to_one_cardinality(df, col1, col2):
     --------
     >>> rgstrs = read_registrations('tests/registrations.csv')
     >>> check_one_to_one_cardinality( \
-        df=rgstrs, col1='local_dataset_id', col2='local_dataset_endpoint' \
+        data=rgstrs, col1='local_dataset_id', col2='local_dataset_endpoint' \
     )
     """
-    df = df[[col1, col2]].drop_duplicates()
-    group_counts = pd.concat([df[col1].value_counts(), df[col2].value_counts()])
+    data = data[[col1, col2]].drop_duplicates()
+    group_counts = pd.concat([data[col1].value_counts(), data[col2].value_counts()])
     replicates = group_counts > 1
     if any(replicates):
         msg = (
@@ -138,7 +138,7 @@ def check_group_registrations(rgstrs):
     >>> check_group_registrations(rgstrs)
     """
     check_one_to_one_cardinality(
-        df=rgstrs, col1="local_dataset_group_id", col2="gbif_dataset_uuid"
+        data=rgstrs, col1="local_dataset_group_id", col2="gbif_dataset_uuid"
     )
 
 
@@ -169,7 +169,7 @@ def check_local_endpoints(rgstrs):
     >>> check_local_endpoints(rgstrs)
     """
     check_one_to_one_cardinality(
-        df=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
+        data=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
     )
 
 

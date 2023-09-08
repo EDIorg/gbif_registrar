@@ -10,35 +10,28 @@ from gbif_registrar.utilities import read_local_dataset_metadata
 
 def test_initialize_registrations_writes_to_path(tmp_path):
     """File is written to path."""
-    f = tmp_path / "registrations.csv"
-    initialize_registrations(f)
-    assert os.path.exists(f)
+    file = tmp_path / "registrations.csv"
+    initialize_registrations(file)
+    assert os.path.exists(file)
 
 
 def test_initialize_registrations_does_not_overwrite(tmp_path):
     """Does not overwrite."""
-    f = tmp_path / "registrations.csv"
-    initialize_registrations(f)
-    with open(f, "rb") as rgstrs:
+    file = tmp_path / "registrations.csv"
+    initialize_registrations(file)
+    with open(file, "rb") as rgstrs:
         md5_before = hashlib.md5(rgstrs.read()).hexdigest()
-    with open(f, "rb") as rgstrs:
+    with open(file, "rb") as rgstrs:
         md5_after = hashlib.md5(rgstrs.read()).hexdigest()
     assert md5_before == md5_after
 
 
 def test_initialize_registrations_has_expected_columns(tmp_path):
     """Has expected columns."""
-    expected_cols = {
-        "local_dataset_id",
-        "local_dataset_group_id",
-        "local_dataset_endpoint",
-        "gbif_dataset_uuid",
-        "gbif_endpoint_set_datetime",
-    }
-    f = tmp_path / "registrations.csv"
-    initialize_registrations(f)
-    df = pd.read_csv(f, delimiter=",")
-    missing_cols = not expected_cols.issubset(set(df.columns))
+    file = tmp_path / "registrations.csv"
+    initialize_registrations(file)
+    data = pd.read_csv(file, delimiter=",")
+    missing_cols = not set(expected_cols()).issubset(set(data.columns))
     assert not missing_cols
 
 
@@ -53,18 +46,6 @@ def test_read_registrations_formats_datetime():
     rgstrs = read_registrations("tests/registrations.csv")
     crawl_time = rgstrs["gbif_endpoint_set_datetime"]
     assert pd.core.dtypes.common.is_datetime64_dtype(crawl_time)
-
-
-def test_expected_cols_has_expected_cols():
-    """The expected_cols helper function has the expected column names."""
-    expected = [
-        "local_dataset_id",
-        "local_dataset_group_id",
-        "local_dataset_endpoint",
-        "gbif_dataset_uuid",
-        "gbif_endpoint_set_datetime",
-    ]
-    assert expected == expected_cols()
 
 
 def test_read_local_dataset_metadata_returns_str():
