@@ -3,7 +3,7 @@
 import json
 from requests import post, get, delete
 from gbif_registrar.config import USER_NAME, PASSWORD, GBIF_API, REGISTRY_BASE_URL
-from gbif_registrar.utilities import read_local_dataset_metadata
+from gbif_registrar.utilities import read_local_dataset_metadata, has_metadata
 
 
 def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
@@ -53,7 +53,8 @@ def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
     # Post a new metadata document to update the GBIF landing page. This is
     # necessary because GBIF doesn't "re-crawl" the local dataset metadata when
     # the new local dataset endpoint is updated.
-    post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
+    if has_metadata(gbif_dataset_uuid):
+        post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
 
 
 def post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):

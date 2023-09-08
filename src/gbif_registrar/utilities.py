@@ -1,8 +1,9 @@
 """Miscellaneous utilities"""
 import os.path
+from json import loads
 import pandas as pd
 from requests import get
-from gbif_registrar.config import PASTA_ENVIRONMENT
+from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
 
 
 def initialize_registrations(file_path):
@@ -111,3 +112,27 @@ def read_local_dataset_metadata(local_dataset_id):
     resp = get(metadata_url, timeout=60)
     resp.raise_for_status()
     return resp.text
+
+
+def has_metadata(gbif_dataset_uuid):
+    """Check if a GBIF dataset has a metadata document.
+
+    Parameters
+    ----------
+    gbif_dataset_uuid : str
+        The registration identifier assigned by GBIF to the local dataset.
+
+    Returns
+    -------
+    bool
+        True if the dataset has a metadata document, False otherwise.
+
+    Notes
+    -----
+    The presence of a dataset title indicates that the dataset has been
+    crawled by GBIF and the metadata document has been created.
+    """
+    resp = get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
+    resp.raise_for_status()
+    details = loads(resp.text)
+    return bool(details.get("title"))
