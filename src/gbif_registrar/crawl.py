@@ -6,11 +6,14 @@ from gbif_registrar.config import username, password, gbif_api, registry_header
 from gbif_registrar.utilities import read_local_dataset_metadata
 
 
-def initiate_crawl(local_dataset_endpoint, gbif_dataset_uuid, local_dataset_id):
+def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
     """Initiate a crawl for a dataset at GBIF.
 
     Parameters
     ----------
+    local_dataset_id : str
+        The identifier of the dataset in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
     local_dataset_endpoint : str
         This is the URL for downloading the dataset (.zip archive) at the EDI
         repository. It has the format: https://pasta.lternet.edu/package/
@@ -18,9 +21,6 @@ def initiate_crawl(local_dataset_endpoint, gbif_dataset_uuid, local_dataset_id):
     gbif_dataset_uuid : str
         The registration identifier assigned by GBIF to the local dataset
         group.
-    local_dataset_id : str
-        The identifier of the dataset in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
 
     Returns
     -------
@@ -54,23 +54,23 @@ def initiate_crawl(local_dataset_endpoint, gbif_dataset_uuid, local_dataset_id):
     # necessary because GBIF doesn't "re-crawl" the local dataset metadata when
     # the new local dataset endpoint is updated.
     # TODO: Call if is an update, not a new dataset?
-    post_new_metadata_document(gbif_dataset_uuid, local_dataset_id)
+    post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
 
     # TODO: Add datetime to log if successful.
     return None
 
 
-def post_new_metadata_document(gbif_dataset_uuid, local_dataset_id):
+def post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
     """Post a new metadata document to GBIF.
 
     Parameters
     ----------
-    gbif_dataset_uuid : str
-        The registration identifier assigned by GBIF to the local dataset
-        group.
     local_dataset_id : str
         The identifier of the dataset in the EDI repository. Has the format:
         {scope}.{identifier}.{revision}.
+    gbif_dataset_uuid : str
+        The registration identifier assigned by GBIF to the local dataset
+        group.
 
     Returns
     -------
