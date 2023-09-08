@@ -6,6 +6,7 @@ from gbif_registrar.utilities import read_registrations
 from gbif_registrar.utilities import initialize_registrations
 from gbif_registrar.utilities import expected_cols
 from gbif_registrar.utilities import read_local_dataset_metadata
+from gbif_registrar.utilities import has_metadata
 
 
 def test_initialize_registrations_writes_to_path(tmp_path):
@@ -52,3 +53,9 @@ def test_read_local_dataset_metadata_returns_str():
     """Test that read_local_dataset_metadata returns a string."""
     metadata = read_local_dataset_metadata("edi.941.3")
     assert isinstance(metadata, str)
+
+
+def test_has_metadata_returns_expected_type():
+    """Test that the has_metadata function returns a boolean."""
+    res = has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
+    assert isinstance(res, bool)
