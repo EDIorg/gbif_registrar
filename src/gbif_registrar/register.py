@@ -229,18 +229,13 @@ def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
 
 
 def request_gbif_dataset_uuid():
-    """Request a gbif_dataset_uuid value from GBIF.
+    """Request a GBIF dataset UUID value from GBIF.
 
     Returns
     -------
     str
-        The gbif_dataset_uuid value. This is the UUID assigned by GBIF to the
+        The GBIF dataset UUID value. This is the UUID assigned by GBIF to the
         local dataset group.
-
-    Notes
-    -----
-    The gbif_dataset_uuid value is an arbitrary UUID value generated and
-    returned by the GBIF server.
     """
     title = "Placeholder title, to be written over by EML metadata from EDI"
     data = {
@@ -257,5 +252,8 @@ def request_gbif_dataset_uuid():
         headers=headers,
         timeout=60,
     )
-    resp.raise_for_status()
+    if resp.status_code != 201:
+        print("HTTP request failed with status code: " + str(resp.status_code))
+        print(resp.reason)
+        return None
     return resp.json()

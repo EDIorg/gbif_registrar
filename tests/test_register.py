@@ -72,18 +72,26 @@ def test_get_gbif_dataset_uuid(rgstrs):
     # res = get_gbif_dataset_uuid(local_dataset_group_id, rgstrs)
 
 
-def test_request_gbif_dataset_uuid():
-    """Test request_gbif_dataset_uuid() function.
-
-    The expected value is a UUID string on success or None in the case of a
-    failed HTTP request."""
-    # Case 1: UUID is returned.
+def test_request_gbif_dataset_uuid_success(mocker):
+    """Test that the request_gbif_dataset_uuid function returns a UUID string
+    when the HTTP request is successful."""
+    mock_response = mocker.Mock()
+    mock_response.status_code = 201
+    mock_response.json.return_value = "4e70c80e-cf22-49a5-8bf7-280994500324"
+    mocker.patch('requests.post', return_value=mock_response)
     res = request_gbif_dataset_uuid()
-    assert isinstance(res, str)
-    assert res is not None
-    # Case 2: HTTP request fails.
-    # TODO: Stub out the GBIF API call to test this case.
-    # res = request_gbif_dataset_uuid()
+    assert res == "4e70c80e-cf22-49a5-8bf7-280994500324"
+
+
+def test_request_gbif_dataset_uuid_failure(mocker):
+    """Test that the request_gbif_dataset_uuid function returns None when the
+    HTTP request fails."""
+    mock_response = mocker.Mock()
+    mock_response.status_code = 400
+    mock_response.reason = "Bad Request"
+    mocker.patch('requests.post', return_value=mock_response)
+    res = request_gbif_dataset_uuid()
+    assert res is None
 
 
 def test_register(local_dataset_id, tmp_path):
