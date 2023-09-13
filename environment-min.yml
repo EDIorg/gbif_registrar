@@ -14,8 +14,9 @@ dependencies:
   - xz=5.2.6
   - libffi=3.4.2
   - libzlib=1.2.13
-  - openssl=3.0.7
+  - openssl
   - readline=8.1.2
   - ncurses=6.3
-  - ca-certificates=2022.9.24
+  - ca-certificates
+  - pytest-mock
 prefix: /opt/miniconda3/envs/gbif_registrar
