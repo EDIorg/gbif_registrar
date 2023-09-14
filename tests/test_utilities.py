@@ -88,7 +88,38 @@ def test_read_local_dataset_metadata_failure(mocker):
     assert metadata is None
 
 
-def test_has_metadata_returns_expected_type():
-    """Test that the has_metadata function returns a boolean."""
+def test_has_metadata_success(mocker):
+    """Test that has_metadata returns True on success."""
+    # Create a JSON string simulating a successful response from the GBIF API
+    json_content = """{"title":"This is a title"}"""
+    mock_response = mocker.Mock()
+    mock_response.status_code = 200
+    mock_response.text = json_content
+    mocker.patch("requests.get", return_value=mock_response)
     res = has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
     assert isinstance(res, bool)
+
+
+def test_has_metadata_failure(mocker):
+    """Test that has_metadata returns False on failure.
+
+    Failure may occur if the GBIF API returns a 404 status code or if the
+    JSON response doesn't contain a title."""
+
+    # Case 1: GBIF API returns a 404 status code
+    mock_response = mocker.Mock()
+    mock_response.status_code = 404
+    mock_response.reason = "Not Found"
+    mocker.patch("requests.get", return_value=mock_response)
+    res = has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
+    assert res is False
+
+    # Case 2: GBIF API returns a 200 status code but the JSON response doesn't
+    # contain a title
+    json_content = """{"description":"This is a description"}"""
+    mock_response = mocker.Mock()
+    mock_response.status_code = 200
+    mock_response.text = json_content
+    mocker.patch("requests.get", return_value=mock_response)
+    res = has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
+    assert res is False

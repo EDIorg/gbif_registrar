@@ -3,7 +3,6 @@ import os.path
 from json import loads
 import pandas as pd
 import requests
-from requests import get
 from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
 
 
@@ -134,7 +133,10 @@ def has_metadata(gbif_dataset_uuid):
     The presence of a dataset title indicates that the dataset has been
     crawled by GBIF and the metadata document has been created.
     """
-    resp = get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
-    resp.raise_for_status()
+    resp = requests.get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
+    if resp.status_code != 200:
+        print("HTTP request failed with status code: " + str(resp.status_code))
+        print(resp.reason)
+        return False
     details = loads(resp.text)
     return bool(details.get("title"))
