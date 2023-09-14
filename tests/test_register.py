@@ -32,6 +32,21 @@ def local_dataset_group_id():
     return "edi.929"
 
 
+@pytest.fixture(name="local_dataset_endpoint")
+def local_dataset_endpoint_fixture():
+    """Create a local_dataset_endpoint fixture for tests."""
+    # This local_dataset_endpoint corresponds to a data package archived on
+    # EDI and formatted according to the DwCA-Event core.
+    return "https://pasta.lternet.edu/package/download/eml/edi/929/2"
+
+
+@pytest.fixture(name="gbif_dataset_uuid")
+def gbif_dataset_uuid_fixture():
+    """Create a gbif_dataset_uuid fixture for tests."""
+    # This gbif_dataset_uuid is an example UUID returned by the GBIF API.
+    return "4e70c80e-cf22-49a5-8bf7-280994500324"
+
+
 def test_get_local_dataset_group_id(local_dataset_id):
     """Test get_local_dataset_group_id() function.
 
@@ -78,7 +93,7 @@ def test_request_gbif_dataset_uuid_success(mocker):
     mock_response = mocker.Mock()
     mock_response.status_code = 201
     mock_response.json.return_value = "4e70c80e-cf22-49a5-8bf7-280994500324"
-    mocker.patch('requests.post', return_value=mock_response)
+    mocker.patch("requests.post", return_value=mock_response)
     res = request_gbif_dataset_uuid()
     assert res == "4e70c80e-cf22-49a5-8bf7-280994500324"
 
@@ -89,40 +104,54 @@ def test_request_gbif_dataset_uuid_failure(mocker):
     mock_response = mocker.Mock()
     mock_response.status_code = 400
     mock_response.reason = "Bad Request"
-    mocker.patch('requests.post', return_value=mock_response)
+    mocker.patch("requests.post", return_value=mock_response)
     res = request_gbif_dataset_uuid()
     assert res is None
 
 
-def test_register(local_dataset_id, tmp_path):
-    """Test register() function.
+def test_register_success(
+    local_dataset_id, gbif_dataset_uuid, tmp_path, rgstrs, mocker
+):
+    """Test that the register function returns a file with a new row containing
+    the local data set ID along with a unique GBIF registration number."""
 
-    This function has three behaviors: 1. A new data set is being registered
-    for the first time; 2. A new data set failed during a previous registration
-    attempt and the function is being run again to fix this; 3. A new data set
-    is not being registered, and all existing data sets are fully registered,
-    which represents a case in which the user ran the function for some "other"
-     reason."""
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
-    rgstrs_initial = read_registrations("tests/registrations.csv")
-    rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
-    # Case 1: A new data set is being registered for the first time. The
-    # resultant registrations file should have a new row containing the local
-    # data set ID along with a unique GBIF registration number.
+    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    mocker.patch(
+        "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
+    )
+
+    # Run the register function and check that the new row was added to the
+    # registrations file, and that the new row contains the local data set ID
+    # and a unique GBIF registration number.
     register(
         file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
     )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
-    assert rgstrs_final.shape[0] == rgstrs_initial.shape[0] + 1
+    assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
-    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] not in set(
-        rgstrs_initial["gbif_dataset_uuid"]
+    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
+
+
+def test_register_repairs_failed_registration(
+    local_dataset_id, gbif_dataset_uuid, tmp_path, rgstrs, mocker
+):
+    """Test that the register function repairs a failed registration attempt."""
+
+    # Create a copy of the registrations file in the temporary test directory
+    # so that the test can modify it without affecting the original file.
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+
+    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    mocker.patch(
+        "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
     )
 
-    # Case 2: A new data set failed during a previous registration attempt and
-    # the function is being run again to fix this.
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register(
@@ -137,15 +166,22 @@ def test_register(local_dataset_id, tmp_path):
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
-    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] not in set(
-        rgstrs_initial["gbif_dataset_uuid"]
-    )
+    assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
     # The last 3 columns of the last row should not be None. The datetime is
     # the only column that should be None because it hasn't been crawled yet.
     assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
-    # Case 3: A new data set is not being registered, and all existing data
-    # sets are fully registered. The regsitration files should be unchanged.
+
+def test_register_ignores_complete_registrations(tmp_path, rgstrs):
+    """Test that the register function ignores complete registrations.
+
+    A new data set is not being registered, and all existing data sets are
+    fully registered. The regsitration files should be unchanged."""
+
+    # Create a copy of the registrations file in the temporary test directory
+    # so that the test can modify it without affecting the original file.
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register(file_path=tmp_path / "registrations.csv")
