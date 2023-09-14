@@ -2,6 +2,7 @@
 import os.path
 from json import loads
 import pandas as pd
+import requests
 from requests import get
 from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
 
@@ -107,10 +108,11 @@ def read_local_dataset_metadata(local_dataset_id):
         + "/"
         + local_dataset_id.split(".")[2]
     )
-
-    # Read metadata document and convert to string for return
-    resp = get(metadata_url, timeout=60)
-    resp.raise_for_status()
+    resp = requests.get(metadata_url, timeout=60)
+    if resp.status_code != 200:
+        print("HTTP request failed with status code: " + str(resp.status_code))
+        print(resp.reason)
+        return None
     return resp.text
 
 
