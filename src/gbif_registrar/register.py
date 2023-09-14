@@ -214,13 +214,22 @@ def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
     # Look in the rgstrs dataframe to see if there is a matching
     # local_data_set_group_id value, and it has a non-empty gbif_dataset_uuid
     # value. If so, get the gbif_dataset_uuid value.
-    if local_dataset_group_id in rgstrs["local_dataset_group_id"].values:
+    has_group_id = local_dataset_group_id in rgstrs["local_dataset_group_id"].values
+    has_uuid = (
+        rgstrs.loc[
+            rgstrs["local_dataset_group_id"] == local_dataset_group_id,
+            "gbif_dataset_uuid",
+        ]
+        .notnull()
+        .iloc[0]
+    )
+    if has_group_id and has_uuid:
         gbif_dataset_uuid = rgstrs.loc[
             rgstrs["local_dataset_group_id"] == local_dataset_group_id,
             "gbif_dataset_uuid",
         ].iloc[0]
     # If there is no matching local_dataset_group_id value, or if there is a
-    # matching local_dataset_group_id value but it has an empty
+    # matching local_dataset_group_id value, but it has an empty
     # gbif_dataset_uuid value, then call the register_dataset function to
     # register the dataset with GBIF and get the gbif_dataset_uuid value.
     else:

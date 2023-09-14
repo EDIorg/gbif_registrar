@@ -67,24 +67,42 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     assert res == expected
 
 
-def test_get_gbif_dataset_uuid(rgstrs):
-    """Test get_gbif_dataset_uuid() function.
-
-    The expected value is a UUID string, which is returned in both cases on
-    which this function operates: 1. The local dataset group ID already has
-    a GBIF dataset UUID; 2. The local dataset group ID does not have a GBIF
-    dataset UUID."""
-
-    # Test case 1: local dataset group ID already has a GBIF dataset UUID.
+def test_get_gbif_dataset_uuid_exists(rgstrs):
+    """Test that the get_gbif_dataset_uuid function returns the GBIF dataset
+    UUID when the local dataset group ID already has a GBIF dataset UUID."""
     row = rgstrs.iloc[-1]
     existing_group_id = row["local_dataset_group_id"]
     existing_uuid = row["gbif_dataset_uuid"]
     res = get_gbif_dataset_uuid(existing_group_id, rgstrs)
     assert res == existing_uuid
 
-    # Test case 2: local dataset group ID does not have a GBIF dataset UUID.
-    # TODO: Stub out the GBIF API call to test this case.
-    # res = get_gbif_dataset_uuid(local_dataset_group_id, rgstrs)
+
+def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
+    """Test that the get_gbif_dataset_uuid function gets a new GBIF dataset
+    UUID when the local dataset group ID does not have a GBIF dataset UUID."""
+    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    gbif_dataset_uuid = "a_new_gbif_dataset_uuid"
+    mocker.patch(
+        "gbif_registrar.register.request_gbif_dataset_uuid",
+        return_value=gbif_dataset_uuid,
+    )
+    # Add new row to the registrations file with a local dataset group ID that
+    # does not have a GBIF dataset UUID to trigger the get_gbif_dataset_uuid
+    # function to get a new GBIF dataset UUID.
+    new_row = rgstrs.iloc[-1].copy()
+    new_row["local_dataset_id"] = "edi.929.1"
+    new_row["local_dataset_group_id"] = "edi.929"
+    new_row[
+        "local_dataset_endpoint"
+    ] = "https://pasta.lternet.edu/package/download/eml/edi/929/1"
+    new_row["gbif_dataset_uuid"] = None
+    new_row["gbif_endpoint_set_datetime"] = None
+    rgstrs = rgstrs.append(new_row, ignore_index=True)
+    # Run the get_gbif_dataset_uuid function and check that it returns the new
+    # GBIF dataset UUID.
+    res = get_gbif_dataset_uuid("edi.929", rgstrs)
+    assert res == gbif_dataset_uuid
 
 
 def test_request_gbif_dataset_uuid_success(mocker):
