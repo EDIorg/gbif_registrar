@@ -16,8 +16,8 @@ def initiate_crawl(local_dataset_id, local_dataset_endpoint, gbif_dataset_uuid):
         {scope}.{identifier}.{revision}.
     local_dataset_endpoint : str
         This is the URL for downloading the dataset (.zip archive) at the EDI
-        repository. It has the format: https://pasta.lternet.edu/package/
-        download/eml/{scope}/{identifier}/{revision}.
+        repository. This value can be obtained from the
+        get_local_dataset_endpoint function in the utilities module.
     gbif_dataset_uuid : str
         The registration identifier assigned by GBIF to the local dataset
         group.
@@ -92,8 +92,8 @@ def post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
     ----------
     local_dataset_endpoint : str
         This is the URL for downloading the dataset (.zip archive) at the EDI
-        repository. It has the format: https://pasta.lternet.edu/package/
-        download/eml/{scope}/{identifier}/{revision}.
+        repository. Use the get_local_dataset_endpoint function in the
+        utilities module to obtain this value.
         gbif_dataset_uuid : str
         The registration identifier assigned by GBIF to the local dataset
         group.
