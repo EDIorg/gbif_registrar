@@ -140,3 +140,24 @@ def has_metadata(gbif_dataset_uuid):
         return False
     details = loads(resp.text)
     return bool(details.get("title"))
+
+
+def get_gbif_dataset_details(gbif_dataset_uuid):
+    """Get the details of a GBIF dataset.
+
+    Parameters
+    ----------
+    gbif_dataset_uuid : str
+        The registration identifier assigned by GBIF to the local dataset.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the details of the GBIF dataset.
+    """
+    resp = requests.get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
+    if resp.status_code != 200:
+        print("HTTP request failed with status code: " + str(resp.status_code))
+        print(resp.reason)
+        return None
+    return loads(resp.text)
