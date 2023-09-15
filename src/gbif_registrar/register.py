@@ -8,6 +8,7 @@ from gbif_registrar.config import (
     ORGANIZATION,
     PASSWORD,
     USER_NAME,
+    PASTA_ENVIRONMENT,
 )
 from gbif_registrar.utilities import read_registrations
 
@@ -172,8 +173,15 @@ def get_local_dataset_endpoint(local_dataset_id):
     scope = local_dataset_id.split(".")[0]
     identifier = local_dataset_id.split(".")[1]
     revision = local_dataset_id.split(".")[2]
-    base_url = "https://pasta.lternet.edu/package/download/eml/"
-    local_dataset_id = base_url + scope + "/" + identifier + "/" + revision
+    local_dataset_id = (
+        PASTA_ENVIRONMENT
+        + "/package/download/eml/"
+        + scope
+        + "/"
+        + identifier
+        + "/"
+        + revision
+    )
     return local_dataset_id
 
 

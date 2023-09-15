@@ -6,6 +6,7 @@ from gbif_registrar.register import get_local_dataset_endpoint
 from gbif_registrar.register import get_gbif_dataset_uuid
 from gbif_registrar.register import register
 from gbif_registrar.register import request_gbif_dataset_uuid
+from gbif_registrar.config import PASTA_ENVIRONMENT
 
 
 @pytest.fixture(name="rgstrs")
@@ -63,7 +64,7 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
     res = get_local_dataset_endpoint(local_dataset_id)
-    expected = "https://pasta.lternet.edu/package/download/eml/edi/929/2"
+    expected = PASTA_ENVIRONMENT + "/package/download/eml/edi/929/2"
     assert res == expected
 
 
