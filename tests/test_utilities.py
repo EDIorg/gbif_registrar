@@ -8,7 +8,7 @@ from gbif_registrar.utilities import initialize_registrations
 from gbif_registrar.utilities import expected_cols
 from gbif_registrar.utilities import read_local_dataset_metadata
 from gbif_registrar.utilities import has_metadata
-from gbif_registrar.utilities import get_gbif_dataset_details
+from gbif_registrar.utilities import read_gbif_dataset_metadata
 
 
 @pytest.fixture(name="eml")
@@ -126,21 +126,21 @@ def test_has_metadata_failure(mocker):
     assert res is False
 
 
-def test_get_gbif_dataset_details_success(mocker):
-    """Test that get_gbif_dataset_details returns a dict on success."""
+def test_read_gbif_dataset_metadata_success(mocker):
+    """Test that read_gbif_dataset_metadata returns a dict on success."""
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = """{"title":"This is a title"}"""
     mocker.patch("requests.get", return_value=mock_response)
-    res = get_gbif_dataset_details("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
+    res = read_gbif_dataset_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
     assert isinstance(res, dict)
 
 
-def test_get_gbif_dataset_details_failure(mocker):
-    """Test that get_gbif_dataset_details returns None on failure."""
+def test_read_gbif_dataset_metadata_failure(mocker):
+    """Test that read_gbif_dataset_metadata returns None on failure."""
     mock_response = mocker.Mock()
     mock_response.status_code = 404
     mock_response.reason = "Not Found"
     mocker.patch("requests.get", return_value=mock_response)
-    res = get_gbif_dataset_details("cfb3f6d5-ed7d-4fff-9f1b-f032e")
+    res = read_gbif_dataset_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032e")
     assert res is None
