@@ -133,13 +133,10 @@ def has_metadata(gbif_dataset_uuid):
     The presence of a dataset title indicates that the dataset has been
     crawled by GBIF and the metadata document has been created.
     """
-    resp = requests.get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
-    if resp.status_code != 200:
-        print("HTTP request failed with status code: " + str(resp.status_code))
-        print(resp.reason)
-        return False
-    details = loads(resp.text)
-    return bool(details.get("title"))
+    metadata = read_gbif_dataset_metadata(gbif_dataset_uuid)
+    if metadata:
+        return bool(metadata.get("title"))
+    return False
 
 
 def read_gbif_dataset_metadata(gbif_dataset_uuid):
