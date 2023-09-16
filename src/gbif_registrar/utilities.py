@@ -142,8 +142,8 @@ def has_metadata(gbif_dataset_uuid):
     return bool(details.get("title"))
 
 
-def get_gbif_dataset_details(gbif_dataset_uuid):
-    """Get the details of a GBIF dataset.
+def read_gbif_dataset_metadata(gbif_dataset_uuid):
+    """Read the metadata of a GBIF dataset.
 
     Parameters
     ----------
@@ -153,7 +153,11 @@ def get_gbif_dataset_details(gbif_dataset_uuid):
     Returns
     -------
     dict
-        A dictionary containing the details of the GBIF dataset.
+        A dictionary containing the metadata of the GBIF dataset.
+
+    Notes
+    -----
+    This is high-level metadata, not the full EML document.
     """
     resp = requests.get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
     if resp.status_code != 200:
