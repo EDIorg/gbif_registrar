@@ -19,4 +19,5 @@ dependencies:
   - ncurses=6.3
   - ca-certificates
   - pytest-mock
+  - lxml
 prefix: /opt/miniconda3/envs/gbif_registrar

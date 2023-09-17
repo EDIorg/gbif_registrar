@@ -45,6 +45,7 @@ jupyter_client==7.4.8
 jupyter_core==5.1.0
 keyring==23.11.0
 lazy-object-proxy==1.8.0
+lxml==4.9.3
 markdown-it-py==2.1.0
 MarkupSafe==2.1.1
 matplotlib-inline==0.1.6

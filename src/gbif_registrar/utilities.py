@@ -2,6 +2,7 @@
 import os.path
 from json import loads
 import pandas as pd
+from lxml import etree
 import requests
 from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
 
@@ -162,3 +163,83 @@ def read_gbif_dataset_metadata(gbif_dataset_uuid):
         print(resp.reason)
         return None
     return loads(resp.text)
+
+
+def is_synchronized(local_dataset_id, file_path):
+    """Check if a local dataset is synchronized with the GBIF registry.
+
+    Parameters
+    ----------
+    local_dataset_id : str
+        The identifier of the dataset in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
+    file_path : str
+        Path of the registrations file containing the registration information
+        for the local dataset.
+
+    Returns
+    -------
+    bool
+        True if the dataset is synchronized, False otherwise.
+
+    Notes
+    -----
+    The local dataset is synchronized if the local dataset publication date
+    (listed in the EML) and the local dataset endpoint match those of the
+    GBIF instance.
+    """
+    # Get the gbif_dataset_uuid to use in the GBIF API call.
+    registrations = read_registrations(file_path)
+    gbif_dataset_uuid = registrations.loc[
+        registrations["local_dataset_id"] == local_dataset_id, "gbif_dataset_uuid"
+    ].values[0]
+
+    # Read the local dataset metadata to get the dataset publication date and
+    # endpoint for comparison with the GBIF instance.
+    local_metadata = read_local_dataset_metadata(local_dataset_id)
+    local_metadata = etree.fromstring(local_metadata.encode("utf-8"))
+    local_pubdate = local_metadata.find("dataset/pubDate").text
+    local_endpoint = get_local_dataset_endpoint(local_dataset_id)
+
+    # Read the GBIF dataset metadata to get the dataset publication date and
+    # endpoint for comparison with the local instance.
+    gbif_metadata = read_gbif_dataset_metadata(gbif_dataset_uuid)
+    gbif_pubdate = gbif_metadata.get("pubDate")
+    gbif_pubdate = gbif_pubdate.split("T")[0]  # PASTA only uses date
+    gbif_endpoint = gbif_metadata.get("endpoints")[0].get("url")
+
+    # If the publication dates and endpoints match, the dataset is
+    # synchronized.
+    pubdate_matches = local_pubdate == gbif_pubdate
+    endpoint_matches = local_endpoint == gbif_endpoint
+    return pubdate_matches and endpoint_matches
+
+
+def get_local_dataset_endpoint(local_dataset_id):
+    """Get the local_dataset_endpoint value.
+
+    Parameters
+    ----------
+    local_dataset_id : str
+        Identifier of the local dataset to be registered with GBIF. The
+        local_dataset_endpoint value is derived from this value.
+
+    Returns
+    -------
+    str
+        The local_dataset_endpoint URL value. This is the URL GBIF will crawl
+        to access the local dataset.
+    """
+    scope = local_dataset_id.split(".")[0]
+    identifier = local_dataset_id.split(".")[1]
+    revision = local_dataset_id.split(".")[2]
+    local_dataset_id = (
+        PASTA_ENVIRONMENT
+        + "/package/download/eml/"
+        + scope
+        + "/"
+        + identifier
+        + "/"
+        + revision
+    )
+    return local_dataset_id
