@@ -8,9 +8,9 @@ from gbif_registrar.config import (
     ORGANIZATION,
     PASSWORD,
     USER_NAME,
-    PASTA_ENVIRONMENT,
 )
 from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import get_local_dataset_endpoint
 
 
 def register(file_path, local_dataset_id=None):
@@ -153,36 +153,6 @@ def get_local_dataset_group_id(local_dataset_id):
     # and everything after it from the local_dataset_id value.
     local_dataset_group_id = local_dataset_id.rsplit(".", 1)[0]
     return local_dataset_group_id
-
-
-def get_local_dataset_endpoint(local_dataset_id):
-    """Get the local_dataset_endpoint value.
-
-    Parameters
-    ----------
-    local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF. The
-        local_dataset_endpoint value is derived from this value.
-
-    Returns
-    -------
-    str
-        The local_dataset_endpoint URL value. This is the URL GBIF will crawl
-        to access the local dataset.
-    """
-    scope = local_dataset_id.split(".")[0]
-    identifier = local_dataset_id.split(".")[1]
-    revision = local_dataset_id.split(".")[2]
-    local_dataset_id = (
-        PASTA_ENVIRONMENT
-        + "/package/download/eml/"
-        + scope
-        + "/"
-        + identifier
-        + "/"
-        + revision
-    )
-    return local_dataset_id
 
 
 def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):

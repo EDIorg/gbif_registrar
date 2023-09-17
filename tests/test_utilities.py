@@ -10,6 +10,7 @@ from gbif_registrar.utilities import expected_cols
 from gbif_registrar.utilities import read_local_dataset_metadata
 from gbif_registrar.utilities import has_metadata
 from gbif_registrar.utilities import read_gbif_dataset_metadata
+from gbif_registrar.utilities import is_synchronized
 
 
 @pytest.fixture(name="eml")
@@ -22,12 +23,24 @@ def eml_fixture():
     xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 
     https://pasta.lternet.edu/eml/eml-2.1.1.xsd">
         <dataset>
-            <title>Long-term monitoring of the effects of prescribed fire on the structure, composition, and function of upland pine-dominated forests at the Santee Experimental Forest, South Carolina, USA (1989 to present)</title>
+            <title>This is a title</title>
             <pubDate>2019-08-01</pubDate>
         </dataset>
     </eml:eml>
     """
     return xml_content
+
+
+@pytest.fixture(name="gbif_metadata")
+def gbif_metadata_fixture():
+    """Create a dict of GBIF metadata for testing."""
+    metadata = {
+        "pubDate": "2019-08-01T00:00:00.000+0000",
+        "endpoints": [
+            {"url": "https://pasta-s.lternet.edu/package/download/eml/edi/941/3"}
+        ],
+    }
+    return metadata
 
 
 def test_initialize_registrations_writes_to_path(tmp_path):
@@ -144,3 +157,73 @@ def test_read_gbif_dataset_metadata_failure(mocker):
     mocker.patch("requests.get", return_value=mock_response)
     res = read_gbif_dataset_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032e")
     assert res is None
+
+
+def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
+    """Test that is_synchronized returns True on success."""
+    registrations = read_registrations("tests/registrations.csv")
+    # Add new line to registrations with a dataset that is synchronized with
+    # GBIF so that is_synchronized can access this information via the
+    # file_path argument.
+    local_dataset_id = "edi.941.3"
+    new_row = registrations.iloc[-1].copy()
+    new_row["local_dataset_id"] = local_dataset_id
+    new_row["local_dataset_group_id"] = "edi.941"
+    new_row["gbif_dataset_uuid"] = "cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485"
+    new_row[
+        "local_dataset_endpoint"
+    ] = "https://pasta-s.lternet.edu/package/data/eml/edi/941/3"
+    registrations = registrations.append(new_row, ignore_index=True)
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
+
+    # Mock the response from read_local_dataset_metadata and
+    # read_gbif_dataset_metadata so that is_synchronized can access this
+    # information.
+    mocker.patch(
+        "gbif_registrar.utilities.read_local_dataset_metadata",
+        return_value=eml,
+    )
+    mocker.patch(
+        "gbif_registrar.utilities.read_gbif_dataset_metadata",
+        return_value=gbif_metadata,
+    )
+
+    # Check if the dataset is synchronized
+    res = is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    assert res
+
+
+def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
+    """Test that is_synchronized returns False on failure."""
+    registrations = read_registrations("tests/registrations.csv")
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
+    local_dataset_id = "edi.941.3"
+    # Mock the response from read_local_dataset_metadata and
+    # read_gbif_dataset_metadata so that is_synchronized can access this
+    # information.
+    mocker.patch(
+        "gbif_registrar.utilities.read_local_dataset_metadata",
+        return_value=eml,
+    )
+
+    # Case 1: Response from read_gbif_dataset_metadata has the wrong pubDate
+    mock_response = gbif_metadata.copy()
+    mock_response["pubDate"] = "2019-08-02T00:00:00.000+0000"
+    mocker.patch(
+        "gbif_registrar.utilities.read_gbif_dataset_metadata",
+        return_value=mock_response,
+    )
+    res = is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    assert res is False
+
+    # Case 2: Response from read_gbif_dataset_metadata has the wrong endpoint
+    mock_response = gbif_metadata.copy()
+    mock_response["endpoints"][0][
+        "url"
+    ] = "https://pasta-s.lternet.edu/package/data/eml/edi/941/X"
+    mocker.patch(
+        "gbif_registrar.utilities.read_gbif_dataset_metadata",
+        return_value=mock_response,
+    )
+    res = is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    assert res is False
