@@ -1,16 +1,9 @@
 """Test validate"""
+
 import warnings
-import pytest
 import numpy as np
 import pandas as pd
 from gbif_registrar import validate
-from gbif_registrar import utilities
-
-
-@pytest.fixture(name="rgstrs")
-def rgstrs_fixture():
-    """Read the test registrations file into DataFrame fixture."""
-    return utilities.read_registrations("tests/registrations.csv")
 
 
 def test_check_completeness_valid(rgstrs):
