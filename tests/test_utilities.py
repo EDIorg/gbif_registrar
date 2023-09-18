@@ -1,8 +1,8 @@
 """Test utilities"""
+
 import os.path
 import hashlib
 from json import loads
-import pytest
 import pandas as pd
 from gbif_registrar.utilities import read_registrations
 from gbif_registrar.utilities import initialize_registrations
@@ -11,36 +11,6 @@ from gbif_registrar.utilities import read_local_dataset_metadata
 from gbif_registrar.utilities import has_metadata
 from gbif_registrar.utilities import read_gbif_dataset_metadata
 from gbif_registrar.utilities import is_synchronized
-
-
-@pytest.fixture(name="eml")
-def eml_fixture():
-    """Create an EML XML string for testing."""
-    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
-    <eml:eml packageId="knb-lter-ble.20.1" system="https://pasta-d.lternet.edu" 
-    xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 
-    https://pasta.lternet.edu/eml/eml-2.1.1.xsd">
-        <dataset>
-            <title>This is a title</title>
-            <pubDate>2019-08-01</pubDate>
-        </dataset>
-    </eml:eml>
-    """
-    return xml_content
-
-
-@pytest.fixture(name="gbif_metadata")
-def gbif_metadata_fixture():
-    """Create a dict of GBIF metadata for testing."""
-    metadata = {
-        "pubDate": "2019-08-01T00:00:00.000+0000",
-        "endpoints": [
-            {"url": "https://pasta-s.lternet.edu/package/download/eml/edi/941/3"}
-        ],
-    }
-    return metadata
 
 
 def test_initialize_registrations_writes_to_path(tmp_path):
