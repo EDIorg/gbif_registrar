@@ -59,7 +59,7 @@ def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
         "local_dataset_endpoint"
     ] = "https://pasta.lternet.edu/package/download/eml/edi/929/1"
     new_row["gbif_dataset_uuid"] = None
-    new_row["gbif_endpoint_set_datetime"] = None
+    new_row["is_synchronized"] = False
     rgstrs = rgstrs.append(new_row, ignore_index=True)
     # Run the get_gbif_dataset_uuid function and check that it returns the new
     # GBIF dataset UUID.
@@ -147,8 +147,9 @@ def test_register_repairs_failed_registration(
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
-    # The last 3 columns of the last row should not be None. The datetime is
-    # the only column that should be None because it hasn't been crawled yet.
+    # The last 3 columns of the last row should not be None. The
+    # synchronization status is the only column that should be False because it
+    # hasn't been crawled yet.
     assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
 

@@ -57,7 +57,7 @@ def register(file_path, local_dataset_id=None):
                     "local_dataset_group_id": None,
                     "local_dataset_endpoint": None,
                     "gbif_dataset_uuid": None,
-                    "gbif_endpoint_set_datetime": None,
+                    "is_synchronized": None,
                 },
                 index=[0],
             )
@@ -74,8 +74,7 @@ def complete_registrations(rgstrs):
     Parameters
     ----------
     rgstrs : DataFrame
-        Pandas dataframe with the gbif_endpoint_set_datetime column formatted as
-        datetime.
+        Pandas dataframe.
 
     Returns
     -------
@@ -84,13 +83,13 @@ def complete_registrations(rgstrs):
     """
     # Get all rows where the rgstrs dataframe columns
     # local_dataset_group_id, local_dataset_endpoint, gbif_dataset_uuid,
-    # gbif_endpoint_set_datetime contain empty values. These are the rows
+    # is_synchronized contain empty values. These are the rows
     # that need to be completed.
     record = rgstrs[
         (rgstrs["local_dataset_group_id"].isnull())
         | (rgstrs["local_dataset_endpoint"].isnull())
         | (rgstrs["gbif_dataset_uuid"].isnull())
-        | (rgstrs["gbif_endpoint_set_datetime"].isnull())
+        | (rgstrs["is_synchronized"].isnull())
     ]
     # If the record dataframe is empty, then there are no rows to complete.
     # Return the rgstrs dataframe.
