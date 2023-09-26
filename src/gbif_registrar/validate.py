@@ -9,7 +9,7 @@ def check_completeness(rgstrs):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
-    `gbif_endpoint_set_datetime`, which is not essential for initiating a GBIF
+    `is_synchronized`, which is not essential for initiating a GBIF
     crawl.
 
     Parameters
@@ -27,7 +27,7 @@ def check_completeness(rgstrs):
     UserWarning
         If any registrations are incomplete.
     """
-    rgstrs = rgstrs[expected_cols()].drop(["gbif_endpoint_set_datetime"], axis=1)
+    rgstrs = rgstrs[expected_cols()].drop(["is_synchronized"], axis=1)
     rgstrs = rgstrs[rgstrs.isna().any(axis=1)]
     if len(rgstrs) > 0:
         rows = rgstrs.index.to_series() + 1
@@ -173,12 +173,13 @@ def check_local_endpoints(rgstrs):
     )
 
 
-def check_crawl_datetime(rgstrs):
-    """Checks if registrations have been crawled.
+def check_is_synchronized(rgstrs):
+    """Checks if registrations have been synchronized.
 
     Registrations contain all the information needed for GBIF to successfully
-    crawl the corresponding dataset and post to the GBIF data portal. Datetime
-    values in the `gbif_endpoint_set_datetime` indicate the dataset has been crawled.
+    crawl the corresponding dataset and post to the GBIF data portal. Boolean
+    True/False values in the `is_synchronized` field indicate the dataset is
+    synchronized.
 
     Parameters
     ----------
@@ -197,13 +198,12 @@ def check_crawl_datetime(rgstrs):
     Examples
     --------
     >>> rgstrs = read_registrations('tests/registrations.csv')
-    >>> check_crawl_datetime(rgstrs)
+    >>> check_is_synchronized(rgstrs)
     """
-    uncrawled = rgstrs["gbif_endpoint_set_datetime"].isna()
-    if any(uncrawled):
-        rows = rgstrs[uncrawled].index.to_series() + 1
-        rows = rows.astype("string")
-        warnings.warn("Uncrawled registrations in rows: " + ", ".join(rows))
+    if not rgstrs["is_synchronized"].all():
+        rows = rgstrs["is_synchronized"].index.to_series() + 1
+        rows = rows[~rgstrs["is_synchronized"]].astype("string")
+        warnings.warn("Unsynchronized registrations in rows: " + ", ".join(rows))
 
 
 def check_local_dataset_id_format(rgstrs):
@@ -278,7 +278,7 @@ def validate_registrations(file_path, extended_checks=False):
 
     This is a wrapper to `check_completeness`, `check_local_dataset_id`,
     `check_group_registrations`, `check_local_endpoints`, and
-    `check_crawl_datetime`.
+    `check_is_synchronized`.
 
     Parameters
     ----------
@@ -308,7 +308,7 @@ def validate_registrations(file_path, extended_checks=False):
     check_local_dataset_id(rgstrs)
     check_group_registrations(rgstrs)
     check_local_endpoints(rgstrs)
-    check_crawl_datetime(rgstrs)
+    check_is_synchronized(rgstrs)
     if extended_checks:
         check_local_dataset_id_format(rgstrs)
         check_local_dataset_group_id_format(rgstrs)

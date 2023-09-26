@@ -68,22 +68,22 @@ def test_check_one_to_one_cardinality_warn(rgstrs):
         assert rgstrs.loc[3, "local_dataset_endpoint"] in str(warns[0].message)
 
 
-def test_check_crawl_datetime_valid(rgstrs):
+def test_check_is_synchronized_valid(rgstrs):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        validate.check_crawl_datetime(rgstrs)
+        validate.check_is_synchronized(rgstrs)
         assert len(warns) == 0
 
 
-def test_check_crawl_datetime_warn(rgstrs):
-    """Uncrawled registrations result in a warning."""
-    rgstrs.loc[0, "gbif_endpoint_set_datetime"] = np.nan
-    rgstrs.loc[2, "gbif_endpoint_set_datetime"] = np.nan
+def test_check_is_synchronized_warn(rgstrs):
+    """Unsynchronized registrations result in a warning."""
+    rgstrs.loc[0, "is_synchronized"] = False
+    rgstrs.loc[2, "is_synchronized"] = False
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        validate.check_crawl_datetime(rgstrs)
-        assert "Uncrawled registrations in rows" in str(warns[0].message)
+        validate.check_is_synchronized(rgstrs)
+        assert "Unsynchronized registrations in rows" in str(warns[0].message)
         assert "1, 3" in str(warns[0].message)
 
 

@@ -12,9 +12,9 @@ def initialize_registrations(file_path):
 
     The registrations file is a map from datasets in the local repository, to
     identifiers in the remote GBIF registry. This file contains additional
-    information about the local datasets, as well as the most recent datetime
-    GBIF crawled the local endpoint to synchronize the registry instance. The
-    registrations file columns (and definitions):
+    information about the local datasets, as well as the synchronization
+    status of the local dataset with GBIF. The registrations file columns
+    (and definitions):
 
     - `local_dataset_id`: The identifier of the dataset in the local
       repository system. This is the primary key.
@@ -27,8 +27,8 @@ def initialize_registrations(file_path):
     - `gbif_dataset_uuid`: The registration identifier assigned by GBIF to the
       local dataset group. This has a one-to-one relationship with
       `local_dataset_group_id`.
-    - `gbif_endpoint_set_datetime`: The datetime GBIF crawled the
-      `local_dataset_endpoint`.
+    - `is_synchronized`: The synchronization status of the local dataset with
+      GBIF.
 
     Parameters
     ----------
@@ -58,17 +58,13 @@ def read_registrations(file_path):
     Returns
     -------
     DataFrame
-        Pandas dataframe with the gbif_endpoint_set_datetime column formatted as
-        datetime.
+        Pandas dataframe.
 
     See Also
     --------
     check_registrations_file
     """
     rgstrs = pd.read_csv(file_path, delimiter=",")
-    rgstrs["gbif_endpoint_set_datetime"] = pd.to_datetime(
-        rgstrs["gbif_endpoint_set_datetime"]
-    )
     return rgstrs
 
 
@@ -79,7 +75,7 @@ def expected_cols():
         "local_dataset_group_id",
         "local_dataset_endpoint",
         "gbif_dataset_uuid",
-        "gbif_endpoint_set_datetime",
+        "is_synchronized",
     ]
     return cols
 

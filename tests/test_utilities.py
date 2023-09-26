@@ -46,13 +46,6 @@ def test_read_registrations_reads_file():
     assert isinstance(rgstrs, pd.DataFrame)
 
 
-def test_read_registrations_formats_datetime():
-    """Formats the datetime column."""
-    rgstrs = read_registrations("tests/registrations.csv")
-    crawl_time = rgstrs["gbif_endpoint_set_datetime"]
-    assert pd.core.dtypes.common.is_datetime64_dtype(crawl_time)
-
-
 def test_read_local_dataset_metadata_success(mocker, eml):
     """Test that read_local_dataset_metadata returns a string on success."""
     mock_response = mocker.Mock()
