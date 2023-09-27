@@ -87,7 +87,7 @@ def register_dataset(local_dataset_id, registrations_file):
     # Read the registrations file from the file path parameter
     registrations = read_registrations_file(registrations_file)
     # If the local_dataset_id already exists in the registrations file, then
-    # return the registrations file as-is and send to complete_registrations
+    # return the registrations file as-is and send to complete_registration_records
     # function for further processing.
     if local_dataset_id not in set(registrations["local_dataset_id"]):
         # If the local_dataset_id parameter is not None, then append the
@@ -106,76 +106,86 @@ def register_dataset(local_dataset_id, registrations_file):
                 index=[0],
             )
             registrations = pd.concat([registrations, new_row], ignore_index=True)
-    # Call the complete_registrations function to complete the registration
-    registrations = complete_registrations(registrations)
+    # Call the complete_registration_records function to complete the registration
+    registrations = complete_registration_records(registrations)
     # Write the completed registrations file to the file path parameter
     registrations.to_csv(registrations_file, index=False, mode="w")
 
 
-def complete_registrations(rgstrs):
-    """Complete the registration of a local_dataset_id with GBIF.
+def complete_registration_records(registrations):
+    """Return a completed set of registration records.
 
     Parameters
     ----------
-    rgstrs : DataFrame
-        Pandas dataframe.
+    registrations : DataFrame
+        The registrations file as a Pandas dataframe. Use the
+        `read_registrations_file` function to create this.
 
     Returns
     -------
     DataFrame
-        Pandas dataframe with other columns completed.
+        The registrations file as a Pandas dataframe, with all registration
+        records completed.
+
+    Examples
+    --------
+    >>> df = read_registrations_file("registrations.csv")
+    >>> complete_registration_records(df)
     """
-    # Get all rows where the rgstrs dataframe columns
+    # Get all rows where the registrations dataframe columns
     # local_dataset_group_id, local_dataset_endpoint, gbif_dataset_uuid,
     # is_synchronized contain empty values. These are the rows
     # that need to be completed.
-    record = rgstrs[
-        (rgstrs["local_dataset_group_id"].isnull())
-        | (rgstrs["local_dataset_endpoint"].isnull())
-        | (rgstrs["gbif_dataset_uuid"].isnull())
-        | (rgstrs["is_synchronized"].isnull())
+    record = registrations[
+        (registrations["local_dataset_group_id"].isnull())
+        | (registrations["local_dataset_endpoint"].isnull())
+        | (registrations["gbif_dataset_uuid"].isnull())
+        | (registrations["is_synchronized"].isnull())
     ]
     # If the record dataframe is empty, then there are no rows to complete.
-    # Return the rgstrs dataframe.
+    # Return the registrations dataframe.
     if record.empty:
-        return rgstrs
+        return registrations
     # If the record dataframe is not empty, then there are rows to complete.
     # Iterate through the rows of the record dataframe.
     for index, row in record.iterrows():
         # If the local_dataset_group_id column is empty, then call the
         # get_local_dataset_group_id function to get the local_dataset_group_id
         # value and insert it into the local_dataset_group_id column of the
-        # rgstrs dataframe.
+        # registrations dataframe.
         if pd.isnull(row["local_dataset_group_id"]):
             local_dataset_group_id = get_local_dataset_group_id(
                 local_dataset_id=row["local_dataset_id"]
             )
-            # Add the local_dataset_group_id value to the local_dataset_group_id
-            # column of the rgstrs dataframe.
-            rgstrs.loc[index, "local_dataset_group_id"] = local_dataset_group_id
+            # Add the local_dataset_group_id value to the
+            # local_dataset_group_id column of the registrations dataframe.
+            registrations.loc[index, "local_dataset_group_id"] = local_dataset_group_id
         # If the local_dataset_endpoint column is empty, then call the
         # get_local_dataset_endpoint function to get the local_dataset_endpoint
         # value and insert it into the local_dataset_endpoint column of the
-        # rgstrs dataframe.
+        # registrations dataframe.
         if pd.isnull(row["local_dataset_endpoint"]):
             local_dataset_endpoint = get_local_dataset_endpoint(
                 local_dataset_id=row["local_dataset_id"]
             )
-            # Add the local_dataset_endpoint value to the local_dataset_endpoint
-            # column of the rgstrs dataframe.
-            rgstrs.loc[index, "local_dataset_endpoint"] = local_dataset_endpoint
+            # Add the local_dataset_endpoint value to the
+            # local_dataset_endpoint column of the registrations dataframe.
+            registrations.loc[index, "local_dataset_endpoint"] = local_dataset_endpoint
         # If the gbif_dataset_uuid column is empty, then call the
         # get_gbif_dataset_uuid function to get the gbif_dataset_uuid value and
-        # insert it into the gbif_dataset_uuid column of the rgstrs dataframe.
+        # insert it into the gbif_dataset_uuid column of the registrations
+        # dataframe.
         if pd.isnull(row["gbif_dataset_uuid"]):
             gbif_dataset_uuid = get_gbif_dataset_uuid(
-                local_dataset_group_id=rgstrs.loc[index, "local_dataset_endpoint"],
-                rgstrs=rgstrs,
+                local_dataset_group_id=registrations.loc[
+                    index, "local_dataset_endpoint"
+                ],
+                rgstrs=registrations,
             )
-            # Add the gbif_dataset_uuid value to the gbif_dataset_uuid column of
-            # the rgstrs dataframe.
-            rgstrs.loc[index, "gbif_dataset_uuid"] = gbif_dataset_uuid
-    return rgstrs
+            # Add the gbif_dataset_uuid value to the gbif_dataset_uuid column
+            # of the registrations dataframe.
+            registrations.loc[index, "gbif_dataset_uuid"] = gbif_dataset_uuid
+    return registrations
 
 
 def get_local_dataset_group_id(local_dataset_id):
