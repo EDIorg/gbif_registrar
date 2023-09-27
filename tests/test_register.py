@@ -1,5 +1,8 @@
 """Test register.py"""
 
+import os.path
+import hashlib
+import pandas as pd
 from gbif_registrar.utilities import read_registrations
 from gbif_registrar.register import get_local_dataset_group_id
 from gbif_registrar.register import get_local_dataset_endpoint
@@ -7,6 +10,35 @@ from gbif_registrar.register import get_gbif_dataset_uuid
 from gbif_registrar.register import register
 from gbif_registrar.register import request_gbif_dataset_uuid
 from gbif_registrar.config import PASTA_ENVIRONMENT
+from gbif_registrar.register import initialize_registrations_file
+from gbif_registrar.utilities import expected_cols
+
+
+def test_initialize_registrations_file_writes_to_path(tmp_path):
+    """File is written to path."""
+    file = tmp_path / "registrations.csv"
+    initialize_registrations_file(file)
+    assert os.path.exists(file)
+
+
+def test_initialize_registrations_file_does_not_overwrite(tmp_path):
+    """Does not overwrite."""
+    file = tmp_path / "registrations.csv"
+    initialize_registrations_file(file)
+    with open(file, "rb") as rgstrs:
+        md5_before = hashlib.md5(rgstrs.read()).hexdigest()
+    with open(file, "rb") as rgstrs:
+        md5_after = hashlib.md5(rgstrs.read()).hexdigest()
+    assert md5_before == md5_after
+
+
+def test_initialize_registrations_file_has_expected_columns(tmp_path):
+    """Has expected columns."""
+    file = tmp_path / "registrations.csv"
+    initialize_registrations_file(file)
+    data = pd.read_csv(file, delimiter=",")
+    missing_cols = not set(expected_cols()).issubset(set(data.columns))
+    assert not missing_cols
 
 
 def test_get_local_dataset_group_id(local_dataset_id):

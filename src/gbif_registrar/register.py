@@ -1,4 +1,5 @@
 """Functions for registering datasets with GBIF."""
+import os.path
 import json
 import requests
 import pandas as pd
@@ -11,6 +12,57 @@ from gbif_registrar.config import (
 )
 from gbif_registrar.utilities import read_registrations
 from gbif_registrar.utilities import get_local_dataset_endpoint
+from gbif_registrar.utilities import expected_cols
+
+
+def initialize_registrations_file(file_path):
+    """Returns an empty registrations file.
+
+    The registrations file maps datasets from the local EDI data repository to
+    the remote GBIF registry and indicates synchronization status between the
+    two.
+
+    Parameters
+    ----------
+    file_path : str
+        Path of file to be written. A .csv file extension is expected.
+
+    Returns
+    -------
+    None
+        The registrations file as a .csv.
+
+    Notes
+    -----
+    The registrations file columns and definitions are as follows:
+
+    - `local_dataset_id`: The dataset identifier in the EDI repository. This
+      is the primary key. The term 'dataset' used here, is synonymous with the
+      term 'data package' in the EDI repository.
+    - `local_dataset_group_id`: The dataset group identifier in the EDI
+      repository. This often forms a one-to-many relationship with
+      `local_dataset_id`. The term 'dataset group' used here, is synonymous
+      with the term 'data package series' in the EDI repository.
+    - `local_dataset_endpoint`: The endpoint for downloading the dataset from
+      the EDI repository. This forms a one-to-one relationship with
+      `local_dataset_id`.
+    - `gbif_dataset_uuid`: The registration identifier assigned by GBIF to the
+      `local_dataset_group_id`. This forms a one-to-one relationship with
+      `local_dataset_group_id`.
+    - `is_synchronized`: The synchronization status of the `local_dataset_id`
+      with GBIF. Is `True` if the local dataset is synchronized with GBIF, and
+      `False` if the local dataset is not synchronized with GBIF. This forms
+      a one-to-one relationship with `local_dataset_id`.
+
+    Examples
+    --------
+    >>> initialize_registrations_file("registrations.csv")
+    """
+    if os.path.exists(file_path):
+        pass
+    else:
+        data = pd.DataFrame(columns=expected_cols())
+        data.to_csv(file_path, index=False, mode="x")
 
 
 def register(file_path, local_dataset_id=None):

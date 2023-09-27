@@ -1,43 +1,12 @@
 """Test utilities"""
 
-import os.path
-import hashlib
 from json import loads
 import pandas as pd
 from gbif_registrar.utilities import read_registrations
-from gbif_registrar.utilities import initialize_registrations
-from gbif_registrar.utilities import expected_cols
 from gbif_registrar.utilities import read_local_dataset_metadata
 from gbif_registrar.utilities import has_metadata
 from gbif_registrar.utilities import read_gbif_dataset_metadata
 from gbif_registrar.utilities import is_synchronized
-
-
-def test_initialize_registrations_writes_to_path(tmp_path):
-    """File is written to path."""
-    file = tmp_path / "registrations.csv"
-    initialize_registrations(file)
-    assert os.path.exists(file)
-
-
-def test_initialize_registrations_does_not_overwrite(tmp_path):
-    """Does not overwrite."""
-    file = tmp_path / "registrations.csv"
-    initialize_registrations(file)
-    with open(file, "rb") as rgstrs:
-        md5_before = hashlib.md5(rgstrs.read()).hexdigest()
-    with open(file, "rb") as rgstrs:
-        md5_after = hashlib.md5(rgstrs.read()).hexdigest()
-    assert md5_before == md5_after
-
-
-def test_initialize_registrations_has_expected_columns(tmp_path):
-    """Has expected columns."""
-    file = tmp_path / "registrations.csv"
-    initialize_registrations(file)
-    data = pd.read_csv(file, delimiter=",")
-    missing_cols = not set(expected_cols()).issubset(set(data.columns))
-    assert not missing_cols
 
 
 def test_read_registrations_reads_file():
