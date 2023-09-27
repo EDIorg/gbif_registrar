@@ -1,50 +1,9 @@
 """Miscellaneous utilities"""
-import os.path
 from json import loads
 import pandas as pd
 from lxml import etree
 import requests
 from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
-
-
-def initialize_registrations(file_path):
-    """Writes an empty registrations file to path.
-
-    The registrations file is a map from datasets in the local repository, to
-    identifiers in the remote GBIF registry. This file contains additional
-    information about the local datasets, as well as the synchronization
-    status of the local dataset with GBIF. The registrations file columns
-    (and definitions):
-
-    - `local_dataset_id`: The identifier of the dataset in the local
-      repository system. This is the primary key.
-    - `local_dataset_group_id`: An identifier for grouping datasets of the
-      same series. This can form a one-to-many relationship with
-      local_dataset_id.
-    - `local_dataset_endpoint`: The endpoint for the local dataset to be
-      crawled by GBIF. This generally has a one-to-one relationship with
-      `local_dataset_id`.
-    - `gbif_dataset_uuid`: The registration identifier assigned by GBIF to the
-      local dataset group. This has a one-to-one relationship with
-      `local_dataset_group_id`.
-    - `is_synchronized`: The synchronization status of the local dataset with
-      GBIF.
-
-    Parameters
-    ----------
-    file_path : Any
-        Path of file to be written. A .csv file extension is expected.
-
-    Returns
-    -------
-    None
-        The registrations file as a .csv.
-    """
-    if os.path.exists(file_path):
-        pass
-    else:
-        data = pd.DataFrame(columns=expected_cols())
-        data.to_csv(file_path, index=False, mode="x")
 
 
 def read_registrations(file_path):
