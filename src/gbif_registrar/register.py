@@ -10,7 +10,7 @@ from gbif_registrar.config import (
     PASSWORD,
     USER_NAME,
 )
-from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import read_registrations_file
 from gbif_registrar.utilities import get_local_dataset_endpoint
 from gbif_registrar.utilities import expected_cols
 
@@ -85,7 +85,7 @@ def register_dataset(local_dataset_id, registrations_file):
     >>> register_dataset("edi.929.2", "registrations.csv")
     """
     # Read the registrations file from the file path parameter
-    registrations = read_registrations(registrations_file)
+    registrations = read_registrations_file(registrations_file)
     # If the local_dataset_id already exists in the registrations file, then
     # return the registrations file as-is and send to complete_registrations
     # function for further processing.

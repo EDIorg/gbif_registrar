@@ -1,7 +1,7 @@
 """A module for validating the registrations file"""
 import warnings
 import pandas as pd
-from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import read_registrations_file
 from gbif_registrar.utilities import expected_cols
 
 
@@ -15,7 +15,7 @@ def check_completeness(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -58,7 +58,7 @@ def check_local_dataset_id(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_local_dataset_id(rgstrs)
     """
     dupes = rgstrs["local_dataset_id"].duplicated()
@@ -91,7 +91,7 @@ def check_one_to_one_cardinality(data, col1, col2):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_one_to_one_cardinality( \
         data=rgstrs, col1='local_dataset_id', col2='local_dataset_endpoint' \
     )
@@ -134,7 +134,7 @@ def check_group_registrations(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_group_registrations(rgstrs)
     """
     check_one_to_one_cardinality(
@@ -165,7 +165,7 @@ def check_local_endpoints(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_local_endpoints(rgstrs)
     """
     check_one_to_one_cardinality(
@@ -197,7 +197,7 @@ def check_is_synchronized(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_is_synchronized(rgstrs)
     """
     if not rgstrs["is_synchronized"].all():
@@ -226,7 +226,7 @@ def check_local_dataset_id_format(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_local_dataset_id_format(rgstrs)
     """
     ids = rgstrs["local_dataset_id"]
@@ -258,7 +258,7 @@ def check_local_dataset_group_id_format(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = read_registrations('tests/registrations.csv')
+    >>> rgstrs = read_registrations_file('tests/registrations.csv')
     >>> check_local_dataset_group_id_format(rgstrs)
     """
     ids = rgstrs["local_dataset_id"]
@@ -303,7 +303,7 @@ def validate_registrations(file_path, extended_checks=False):
     --------
     >>> validate_registrations('tests/registrations.csv')
     """
-    rgstrs = read_registrations(file_path)
+    rgstrs = read_registrations_file(file_path)
     check_completeness(rgstrs)
     check_local_dataset_id(rgstrs)
     check_group_registrations(rgstrs)

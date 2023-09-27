@@ -6,25 +6,24 @@ import requests
 from gbif_registrar.config import PASTA_ENVIRONMENT, GBIF_API
 
 
-def read_registrations(file_path):
-    """Reads the registrations file.
+def read_registrations_file(registrations_file):
+    """Return the registrations file as a Pandas dataframe.
 
     Parameters
     ----------
-    file_path : Any
+    registrations_file : str
         Path of the registrations file.
 
     Returns
     -------
     DataFrame
-        Pandas dataframe.
+        The registrations file as a Pandas dataframe.
 
-    See Also
+    Examples
     --------
-    check_registrations_file
+    >>> read_registrations_file("registrations.csv")
     """
-    rgstrs = pd.read_csv(file_path, delimiter=",")
-    return rgstrs
+    return pd.read_csv(registrations_file, delimiter=",")
 
 
 def expected_cols():
@@ -144,7 +143,7 @@ def is_synchronized(local_dataset_id, file_path):
     GBIF instance.
     """
     # Get the gbif_dataset_uuid to use in the GBIF API call.
-    registrations = read_registrations(file_path)
+    registrations = read_registrations_file(file_path)
     gbif_dataset_uuid = registrations.loc[
         registrations["local_dataset_id"] == local_dataset_id, "gbif_dataset_uuid"
     ].values[0]

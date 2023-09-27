@@ -3,7 +3,7 @@
 import os.path
 import hashlib
 import pandas as pd
-from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import read_registrations_file
 from gbif_registrar.register import get_local_dataset_group_id
 from gbif_registrar.register import get_local_dataset_endpoint
 from gbif_registrar.register import get_gbif_dataset_uuid
@@ -144,7 +144,7 @@ def test_register_dataset_success(
         local_dataset_id=local_dataset_id,
         registrations_file=tmp_path / "registrations.csv",
     )
-    rgstrs_final = read_registrations(tmp_path / "registrations.csv")
+    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
@@ -165,20 +165,20 @@ def test_register_dataset_repairs_failed_registration(
         "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
     )
 
-    rgstrs_initial = read_registrations("tests/registrations.csv")
+    rgstrs_initial = read_registrations_file("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register_dataset(
         local_dataset_id=local_dataset_id,
         registrations_file=tmp_path / "registrations.csv",
     )
-    rgstrs_initial = read_registrations(tmp_path / "registrations.csv")
+    rgstrs_initial = read_registrations_file(tmp_path / "registrations.csv")
     rgstrs_initial.iloc[-1, -4:] = None
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register_dataset(
         local_dataset_id=local_dataset_id,
         registrations_file=tmp_path / "registrations.csv",
     )
-    rgstrs_final = read_registrations(tmp_path / "registrations.csv")
+    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
@@ -198,11 +198,11 @@ def test_register_dataset_ignores_complete_registrations(tmp_path, rgstrs):
     # so that the test can modify it without affecting the original file.
     rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
-    rgstrs_initial = read_registrations("tests/registrations.csv")
+    rgstrs_initial = read_registrations_file("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
     register_dataset(
         local_dataset_id=None, registrations_file=tmp_path / "registrations.csv"
     )
-    rgstrs_final = read_registrations(tmp_path / "registrations.csv")
+    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.equals(rgstrs_initial)
