@@ -96,7 +96,7 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     registrations = read_registrations("tests/registrations.csv")
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that is_synchronized can access this information via the
-    # file_path argument.
+    # registrations_file argument.
     local_dataset_id = "edi.941.3"
     new_row = registrations.iloc[-1].copy()
     new_row["local_dataset_id"] = local_dataset_id

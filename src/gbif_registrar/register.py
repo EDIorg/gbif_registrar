@@ -65,43 +65,35 @@ def initialize_registrations_file(file_path):
         data.to_csv(file_path, index=False, mode="x")
 
 
-def register(file_path, local_dataset_id=None):
-    """Register a local_dataset_id with GBIF. This is required before
-    requesting a crawl.
+def register_dataset(local_dataset_id, registrations_file):
+    """Register a local dataset with GBIF and update the registrations file.
 
     Parameters
     ----------
-    file_path : str
-        Path of the registrations file.
     local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF. Run with
-        local_dataset_id argument when registering for the first time, or run
-        with local_dataset_id=None to fix incomplete registrations.
+        The local dataset identifier to be registered with GBIF.
+    registrations_file : str
+        The path of the registrations file.
 
     Returns
     -------
     None
-        The registrations file as a .csv.
+        The registrations file, written back to `registrations_file` as a .csv.
 
-    Notes
-    -----
-    Running this function will overwrite the existing registrations file at
-    `file_path`.
-
-    This function has subroutines that insert a local_dataset_group_id and
-    local_dataset_endpoint based on specifications of the local system. These
-    parts of the source code can be edited to accommodate your local system.
+    Examples
+    --------
+    >>> register_dataset("edi.929.2", "registrations.csv")
     """
     # Read the registrations file from the file path parameter
-    rgstrs = read_registrations(file_path)
+    registrations = read_registrations(registrations_file)
     # If the local_dataset_id already exists in the registrations file, then
     # return the registrations file as-is and send to complete_registrations
     # function for further processing.
-    if local_dataset_id not in set(rgstrs["local_dataset_id"]):
+    if local_dataset_id not in set(registrations["local_dataset_id"]):
         # If the local_dataset_id parameter is not None, then append the
-        # local__dataset_id value to the rgstrs data frame in a new row and in
-        # the local_dataset_id column. The other columns should be empty at this
-        # point.
+        # local__dataset_id value to the registrations data frame in a new row
+        # and in the local_dataset_id column. The other columns should be
+        # empty at this point.
         if local_dataset_id is not None:
             new_row = pd.DataFrame(
                 {
@@ -113,11 +105,11 @@ def register(file_path, local_dataset_id=None):
                 },
                 index=[0],
             )
-            rgstrs = pd.concat([rgstrs, new_row], ignore_index=True)
+            registrations = pd.concat([registrations, new_row], ignore_index=True)
     # Call the complete_registrations function to complete the registration
-    rgstrs = complete_registrations(rgstrs)
+    registrations = complete_registrations(registrations)
     # Write the completed registrations file to the file path parameter
-    rgstrs.to_csv(file_path, index=False, mode="w")
+    registrations.to_csv(registrations_file, index=False, mode="w")
 
 
 def complete_registrations(rgstrs):
