@@ -1,4 +1,4 @@
-"""Test register.py"""
+"""Test register_dataset.py"""
 
 import os.path
 import hashlib
@@ -7,7 +7,7 @@ from gbif_registrar.utilities import read_registrations
 from gbif_registrar.register import get_local_dataset_group_id
 from gbif_registrar.register import get_local_dataset_endpoint
 from gbif_registrar.register import get_gbif_dataset_uuid
-from gbif_registrar.register import register
+from gbif_registrar.register import register_dataset
 from gbif_registrar.register import request_gbif_dataset_uuid
 from gbif_registrar.config import PASTA_ENVIRONMENT
 from gbif_registrar.register import initialize_registrations_file
@@ -121,10 +121,10 @@ def test_request_gbif_dataset_uuid_failure(mocker):
     assert res is None
 
 
-def test_register_success(
+def test_register_dataset_success(
     local_dataset_id, gbif_dataset_uuid, tmp_path, rgstrs, mocker
 ):
-    """Test that the register function returns a file with a new row containing
+    """Test that the register_dataset function returns a file with a new row containing
     the local data set ID along with a unique GBIF registration number."""
 
     # Create a copy of the registrations file in the temporary test directory
@@ -137,11 +137,12 @@ def test_register_success(
         "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
     )
 
-    # Run the register function and check that the new row was added to the
+    # Run the register_dataset function and check that the new row was added to the
     # registrations file, and that the new row contains the local data set ID
     # and a unique GBIF registration number.
-    register(
-        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
+    register_dataset(
+        local_dataset_id=local_dataset_id,
+        registrations_file=tmp_path / "registrations.csv",
     )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
@@ -149,10 +150,10 @@ def test_register_success(
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
 
 
-def test_register_repairs_failed_registration(
+def test_register_dataset_repairs_failed_registration(
     local_dataset_id, gbif_dataset_uuid, tmp_path, rgstrs, mocker
 ):
-    """Test that the register function repairs a failed registration attempt."""
+    """Test that the register_dataset function repairs a failed registration attempt."""
 
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
@@ -166,14 +167,16 @@ def test_register_repairs_failed_registration(
 
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
-    register(
-        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
+    register_dataset(
+        local_dataset_id=local_dataset_id,
+        registrations_file=tmp_path / "registrations.csv",
     )
     rgstrs_initial = read_registrations(tmp_path / "registrations.csv")
     rgstrs_initial.iloc[-1, -4:] = None
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
-    register(
-        file_path=tmp_path / "registrations.csv", local_dataset_id=local_dataset_id
+    register_dataset(
+        local_dataset_id=local_dataset_id,
+        registrations_file=tmp_path / "registrations.csv",
     )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
@@ -185,8 +188,8 @@ def test_register_repairs_failed_registration(
     assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
 
-def test_register_ignores_complete_registrations(tmp_path, rgstrs):
-    """Test that the register function ignores complete registrations.
+def test_register_dataset_ignores_complete_registrations(tmp_path, rgstrs):
+    """Test that the register_dataset function ignores complete registrations.
 
     A new data set is not being registered, and all existing data sets are
     fully registered. The regsitration files should be unchanged."""
@@ -197,7 +200,9 @@ def test_register_ignores_complete_registrations(tmp_path, rgstrs):
 
     rgstrs_initial = read_registrations("tests/registrations.csv")
     rgstrs_initial.to_csv(tmp_path / "registrations.csv", index=False)
-    register(file_path=tmp_path / "registrations.csv")
+    register_dataset(
+        local_dataset_id=None, registrations_file=tmp_path / "registrations.csv"
+    )
     rgstrs_final = read_registrations(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs_initial.shape[0]
     assert rgstrs_final.equals(rgstrs_initial)
