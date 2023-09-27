@@ -2,7 +2,7 @@
 
 from json import loads
 import pandas as pd
-from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import read_registrations_file
 from gbif_registrar.utilities import read_local_dataset_metadata
 from gbif_registrar.utilities import has_metadata
 from gbif_registrar.utilities import read_gbif_dataset_metadata
@@ -11,7 +11,7 @@ from gbif_registrar.utilities import is_synchronized
 
 def test_read_registrations_reads_file():
     """Reads the file."""
-    rgstrs = read_registrations("tests/registrations.csv")
+    rgstrs = read_registrations_file("tests/registrations.csv")
     assert isinstance(rgstrs, pd.DataFrame)
 
 
@@ -93,7 +93,7 @@ def test_read_gbif_dataset_metadata_failure(mocker):
 
 def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     """Test that is_synchronized returns True on success."""
-    registrations = read_registrations("tests/registrations.csv")
+    registrations = read_registrations_file("tests/registrations.csv")
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that is_synchronized can access this information via the
     # registrations_file argument.
@@ -127,7 +127,7 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
 
 def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
     """Test that is_synchronized returns False on failure."""
-    registrations = read_registrations("tests/registrations.csv")
+    registrations = read_registrations_file("tests/registrations.csv")
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
     local_dataset_id = "edi.941.3"
     # Mock the response from read_local_dataset_metadata and

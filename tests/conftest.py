@@ -1,13 +1,13 @@
 """Configure the test suite."""
 
 import pytest
-from gbif_registrar.utilities import read_registrations
+from gbif_registrar.utilities import read_registrations_file
 
 
 @pytest.fixture(name="rgstrs")
 def rgstrs_fixture():
     """Read the test registrations file into DataFrame fixture."""
-    return read_registrations("tests/registrations.csv")
+    return read_registrations_file("tests/registrations.csv")
 
 
 @pytest.fixture(name="local_dataset_id")
