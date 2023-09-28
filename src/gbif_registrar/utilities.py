@@ -170,19 +170,23 @@ def is_synchronized(local_dataset_id, file_path):
 
 
 def get_local_dataset_endpoint(local_dataset_id):
-    """Get the local_dataset_endpoint value.
+    """Return the local_dataset_endpoint value.
 
     Parameters
     ----------
     local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF. The
-        local_dataset_endpoint value is derived from this value.
+        The dataset identifier in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
 
     Returns
     -------
     str
         The local_dataset_endpoint URL value. This is the URL GBIF will crawl
         to access the local dataset.
+
+    Examples
+    --------
+    >>> get_local_dataset_endpoint("knb-lter-nin.1.1")
     """
     scope = local_dataset_id.split(".")[0]
     identifier = local_dataset_id.split(".")[1]
