@@ -189,13 +189,13 @@ def complete_registration_records(registrations):
 
 
 def get_local_dataset_group_id(local_dataset_id):
-    """Get the local_dataset_group_id value.
+    """Return the local_dataset_group_id value.
 
     Parameters
     ----------
     local_dataset_id : str
-        Identifier of the local dataset to be registered with GBIF. The
-        local_dataset_group_id value is derived from this value.
+        The dataset identifier in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
 
     Returns
     -------
@@ -209,13 +209,13 @@ def get_local_dataset_group_id(local_dataset_id):
 
 
 def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
-    """Get the gbif_dataset_uuid value.
+    """Return the gbif_dataset_uuid value.
 
     Parameters
     ----------
     local_dataset_group_id : str
-        Identifier of the local dataset group to be registered with GBIF. The
-        gbif_dataset_uuid value is created by GBIF and returned upon request.
+        The dataset group identifier in the EDI repository. Has the format:
+        {scope}.{identifier}.
     rgstrs : pandas dataframe
         The registrations file as a dataframe.
 
@@ -224,23 +224,21 @@ def get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
     -------
     str
         The gbif_dataset_uuid value. This is the UUID assigned by GBIF to the
-        local dataset group. A new value will be returned if a
+        local dataset group identifier. A new value will be returned if a
         gbif_dataset_uuid value doesn't already exist for a
         local_dataset_group_id.
 
     Notes
     -----
-     The local_dataset_group_id and gbif_dataset_uuid values have a one-to-one
-     relationship because this allows a dataset series (i.e. multiple versions
-     of a dataset) to be registered with GBIF as a single dataset and displayed
-     from a single URL endpoint on the GBIF system.
+    The local_dataset_group_id and gbif_dataset_uuid values have a one-to-one
+    relationship because this allows a dataset series (i.e. multiple versions
+    of a dataset) to be registered with GBIF as a single dataset and displayed
+    from a single URL endpoint on the GBIF system.
 
-     The rgstrs dataframe is used to check if a gbif_dataset_uuid value already
-     exists for a local_dataset_group_id. If a gbif_dataset_uuid value already
-     exists for a local_dataset_group_id, then the existing gbif_dataset_uuid
-     value is returned. If a gbif_dataset_uuid value does not already exist
-     for a local_dataset_group_id, then a new gbif_dataset_uuid value is
-     created and returned.
+    Examples
+    --------
+    >>> registrations = read_registrations_file("registrations.csv")
+    >>> get_gbif_dataset_uuid("edi.929", registrations)
     """
     # Look in the rgstrs dataframe to see if there is a matching
     # local_data_set_group_id value, and it has a non-empty gbif_dataset_uuid
