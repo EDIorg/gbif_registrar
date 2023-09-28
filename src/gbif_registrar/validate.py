@@ -44,7 +44,7 @@ def check_local_dataset_id(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -120,7 +120,7 @@ def check_group_registrations(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -151,7 +151,7 @@ def check_local_endpoints(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -184,7 +184,7 @@ def check_is_synchronized(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -212,7 +212,7 @@ def check_local_dataset_id_format(rgstrs):
     Parameters
     ----------
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
@@ -243,7 +243,7 @@ def check_local_dataset_group_id_format(rgstrs):
     """Check the format of the local_dataset_group_id.
 
     rgstrs : pandas.DataFrame
-        A dataframe of the registrations file. Use`read_registrations` to
+        A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
     Returns
