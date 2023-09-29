@@ -104,7 +104,7 @@ def register_dataset(local_dataset_id, registrations_file):
                 "local_dataset_group_id": None,
                 "local_dataset_endpoint": None,
                 "gbif_dataset_uuid": None,
-                "is_synchronized": None,
+                "is_synchronized": False,
             },
             index=[0],
         )
@@ -149,7 +149,6 @@ def complete_registration_records(registrations_file):
         (registrations["local_dataset_group_id"].isnull())
         | (registrations["local_dataset_endpoint"].isnull())
         | (registrations["gbif_dataset_uuid"].isnull())
-        | (registrations["is_synchronized"].isnull())
     ]
     # If the record dataframe is empty, then there are no rows to complete.
     # Return the registrations dataframe.
