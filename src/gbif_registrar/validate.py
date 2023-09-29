@@ -273,7 +273,7 @@ def check_local_dataset_group_id_format(rgstrs):
         )
 
 
-def validate_registrations(file_path, extended_checks=False):
+def validate_registrations(file_path):
     """Validates the registrations file.
 
     This is a wrapper to `check_completeness`, `check_local_dataset_id`,
@@ -284,11 +284,6 @@ def validate_registrations(file_path, extended_checks=False):
     ----------
     file_path : str or pathlike object
         Path of the registrations file.
-    extended_checks : bool
-        Run the extended check suite? These checks are repository specific. To
-        create checks for your use case, fork the project repository and edit
-        the source code. Alternatively, run `validate_registrations` with
-        `extended_checks=False` to ignore these checks.
 
     Returns
     -------
@@ -301,7 +296,7 @@ def validate_registrations(file_path, extended_checks=False):
 
     Examples
     --------
-    >>> validate_registrations('tests/registrations.csv')
+    >>> validate_registrations('registrations.csv')
     """
     rgstrs = read_registrations_file(file_path)
     check_completeness(rgstrs)
@@ -309,6 +304,5 @@ def validate_registrations(file_path, extended_checks=False):
     check_group_registrations(rgstrs)
     check_local_endpoints(rgstrs)
     check_is_synchronized(rgstrs)
-    if extended_checks:
-        check_local_dataset_id_format(rgstrs)
-        check_local_dataset_group_id_format(rgstrs)
+    check_local_dataset_id_format(rgstrs)
+    check_local_dataset_group_id_format(rgstrs)
