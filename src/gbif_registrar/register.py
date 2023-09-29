@@ -1,5 +1,6 @@
 """Functions for registering datasets with GBIF."""
 import os.path
+import tempfile
 import json
 import requests
 import pandas as pd
@@ -66,12 +67,13 @@ def initialize_registrations_file(file_path):
 
 
 def register_dataset(local_dataset_id, registrations_file):
-    """Register a local dataset with GBIF and update the registrations file.
+    """Register a local dataset with GBIF and add it to the registrations file.
 
     Parameters
     ----------
     local_dataset_id : str
-        The local dataset identifier to be registered with GBIF.
+        The dataset identifier in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}.
     registrations_file : str
         The path of the registrations file.
 
@@ -84,54 +86,61 @@ def register_dataset(local_dataset_id, registrations_file):
     --------
     >>> register_dataset("edi.929.2", "registrations.csv")
     """
-    # Read the registrations file from the file path parameter
     registrations = read_registrations_file(registrations_file)
     # If the local_dataset_id already exists in the registrations file, then
-    # return the registrations file as-is and send to complete_registration_records
-    # function for further processing.
-    if local_dataset_id not in set(registrations["local_dataset_id"]):
-        # If the local_dataset_id parameter is not None, then append the
-        # local__dataset_id value to the registrations data frame in a new row
-        # and in the local_dataset_id column. The other columns should be
-        # empty at this point.
-        if local_dataset_id is not None:
-            new_row = pd.DataFrame(
-                {
-                    "local_dataset_id": local_dataset_id,
-                    "local_dataset_group_id": None,
-                    "local_dataset_endpoint": None,
-                    "gbif_dataset_uuid": None,
-                    "is_synchronized": None,
-                },
-                index=[0],
-            )
-            registrations = pd.concat([registrations, new_row], ignore_index=True)
-    # Call the complete_registration_records function to complete the registration
-    registrations = complete_registration_records(registrations)
-    # Write the completed registrations file to the file path parameter
-    registrations.to_csv(registrations_file, index=False, mode="w")
+    # there's no work to be done, so return the registrations file as-is.
+    if local_dataset_id in set(registrations["local_dataset_id"]):
+        registrations.to_csv(registrations_file, index=False, mode="w")
+        return None
+    # Create a oneline dataframe with the local_dataset_id for
+    # complete_registrations to operate on (passing a full dataframe results
+    # in iterative registration attempts on other listed local_dataset_id),
+    # append the result to the full registrations data frame and return to the
+    # user.
+    if local_dataset_id is not None:  # None is invalid and will cause an error
+        new_record = pd.DataFrame(
+            {
+                "local_dataset_id": local_dataset_id,
+                "local_dataset_group_id": None,
+                "local_dataset_endpoint": None,
+                "gbif_dataset_uuid": None,
+                "is_synchronized": None,
+            },
+            index=[0],
+        )
+        # Write the new_record dataframe to a .csv file in the temp directory
+        # so that the complete_registration_records function can read it.
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=True) as temp_file:
+            new_record.to_csv(temp_file.name, index=False, mode="w")
+            complete_registration_records(temp_file.name)
+            new_record = read_registrations_file(temp_file.name)
+        registrations = pd.concat([registrations, new_record], ignore_index=True)
+        registrations.to_csv(registrations_file, index=False, mode="w")
+    return None
 
 
-def complete_registration_records(registrations):
+def complete_registration_records(registrations_file):
     """Return a completed set of registration records.
+
+    This function can be run to repair one or more registrations that have
+    missing values in the local_dataset_group_id, local_dataset_endpoint, or
+    gbif_dataset_uuid columns.
 
     Parameters
     ----------
-    registrations : DataFrame
-        The registrations file as a Pandas dataframe. Use the
-        `read_registrations_file` function to create this.
+    registrations_file : str
+        The path of the registrations file.
 
     Returns
     -------
-    DataFrame
-        The registrations file as a Pandas dataframe, with all registration
-        records completed.
+    None
+        The registrations file, written back to `registrations_file` as a .csv.
 
     Examples
     --------
-    >>> df = read_registrations_file("registrations.csv")
-    >>> complete_registration_records(df)
+    >>> complete_registration_records("registrations.csv")
     """
+    registrations = read_registrations_file(registrations_file)
     # Get all rows where the registrations dataframe columns
     # local_dataset_group_id, local_dataset_endpoint, gbif_dataset_uuid,
     # is_synchronized contain empty values. These are the rows
@@ -145,7 +154,7 @@ def complete_registration_records(registrations):
     # If the record dataframe is empty, then there are no rows to complete.
     # Return the registrations dataframe.
     if record.empty:
-        return registrations
+        return None
     # If the record dataframe is not empty, then there are rows to complete.
     # Iterate through the rows of the record dataframe.
     for index, row in record.iterrows():
@@ -185,7 +194,8 @@ def complete_registration_records(registrations):
             # Add the gbif_dataset_uuid value to the gbif_dataset_uuid column
             # of the registrations dataframe.
             registrations.loc[index, "gbif_dataset_uuid"] = gbif_dataset_uuid
-    return registrations
+    registrations.to_csv(registrations_file, index=False, mode="w")
+    return None
 
 
 def get_local_dataset_group_id(local_dataset_id):
