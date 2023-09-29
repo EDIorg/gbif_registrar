@@ -2,8 +2,7 @@
 
 import pytest
 from gbif_registrar.crawl import initiate_crawl
-from gbif_registrar.register import request_gbif_dataset_uuid
-from gbif_registrar.crawl import post_new_metadata_document
+from gbif_registrar.crawl import _post_new_metadata_document
 
 
 def test_initiate_crawl():
