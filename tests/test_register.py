@@ -166,6 +166,7 @@ def test_complete_registration_records_repairs_failed_registration(
     # Simulate a failed registration attempt and write to file for the function
     # to operate on.
     rgstrs.iloc[-1, -4:] = None
+    rgstrs.iloc[-1, -1] = False
     rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
     # Run the function and check that the initial and final registrations files
