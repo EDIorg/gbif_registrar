@@ -3,23 +3,47 @@
 import os.path
 import hashlib
 import pandas as pd
-from gbif_registrar.utilities import read_registrations_file
-from gbif_registrar.register import get_local_dataset_group_id
-from gbif_registrar.register import get_local_dataset_endpoint
-from gbif_registrar.register import get_gbif_dataset_uuid
+from gbif_registrar._utilities import _read_registrations_file, _expected_cols
 from gbif_registrar.register import register_dataset
-from gbif_registrar.register import request_gbif_dataset_uuid
-from gbif_registrar.config import PASTA_ENVIRONMENT
 from gbif_registrar.register import initialize_registrations_file
-from gbif_registrar.utilities import expected_cols
 from gbif_registrar.register import complete_registration_records
 
 
-def test_initialize_registrations_file_writes_to_path(tmp_path):
-    """File is written to path."""
-    file = tmp_path / "registrations.csv"
-    initialize_registrations_file(file)
-    assert os.path.exists(file)
+def test_complete_registration_records_ignores_complete_registrations(tmp_path, rgstrs):
+    """Test that the complete_registration_records function ignores a complete
+    registrations file."""
+    # Create a copy of the registrations file for the function to operate on.
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    complete_registration_records(tmp_path / "registrations.csv")
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    assert rgstrs_final.shape[0] == rgstrs.shape[0]
+    assert rgstrs_final.equals(rgstrs)
+
+
+def test_complete_registration_records_repairs_failed_registration(
+    tmp_path, rgstrs, mocker, gbif_dataset_uuid
+):
+    """Test that the complete_registration_records repairs a failed
+    registration attempt."""
+
+    # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    mocker.patch(
+        "gbif_registrar.register._get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
+    )
+
+    # Simulate a failed registration attempt and write to file for the function
+    # to operate on.
+    rgstrs.iloc[-1, -4:] = None
+    rgstrs.iloc[-1, -1] = False
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+
+    # Run the function and check that the initial and final registrations files
+    # have the same shape and that the last row has been repaired.
+    complete_registration_records(tmp_path / "registrations.csv")
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    assert rgstrs_final.shape[0] == rgstrs.shape[0]
+    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
 
 def test_initialize_registrations_file_does_not_overwrite(tmp_path):
@@ -38,88 +62,21 @@ def test_initialize_registrations_file_has_expected_columns(tmp_path):
     file = tmp_path / "registrations.csv"
     initialize_registrations_file(file)
     data = pd.read_csv(file, delimiter=",")
-    missing_cols = not set(expected_cols()).issubset(set(data.columns))
+    missing_cols = not set(_expected_cols()).issubset(set(data.columns))
     assert not missing_cols
 
 
-def test_get_local_dataset_group_id(local_dataset_id):
-    """Test get_local_dataset_group_id() function.
-
-    The expected value is the local_dataset_id with the version number
-    removed."""
-    res = get_local_dataset_group_id(local_dataset_id)
-    assert res == "edi.929"
+def test_initialize_registrations_file_writes_to_path(tmp_path):
+    """File is written to path."""
+    file = tmp_path / "registrations.csv"
+    initialize_registrations_file(file)
+    assert os.path.exists(file)
 
 
-def test_get_local_dataset_endpoint(local_dataset_id):
-    """Test get_local_dataset_endpoint() function.
-
-    The expected value is a URL composed a base endpoint for the EDI
-    repository Download Data Package Archive endpoint and the local dataset ID
-    value broken into scope, identifier, and version."""
-    res = get_local_dataset_endpoint(local_dataset_id)
-    expected = PASTA_ENVIRONMENT + "/package/download/eml/edi/929/2"
-    assert res == expected
-
-
-def test_get_gbif_dataset_uuid_exists(rgstrs):
-    """Test that the get_gbif_dataset_uuid function returns the GBIF dataset
-    UUID when the local dataset group ID already has a GBIF dataset UUID."""
-    row = rgstrs.iloc[-1]
-    existing_group_id = row["local_dataset_group_id"]
-    existing_uuid = row["gbif_dataset_uuid"]
-    res = get_gbif_dataset_uuid(existing_group_id, rgstrs)
-    assert res == existing_uuid
-
-
-def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
-    """Test that the get_gbif_dataset_uuid function gets a new GBIF dataset
-    UUID when the local dataset group ID does not have a GBIF dataset UUID."""
-    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
-    # an actual HTTP request.
-    gbif_dataset_uuid = "a_new_gbif_dataset_uuid"
-    mocker.patch(
-        "gbif_registrar.register.request_gbif_dataset_uuid",
-        return_value=gbif_dataset_uuid,
-    )
-    # Add new row to the registrations file with a local dataset group ID that
-    # does not have a GBIF dataset UUID to trigger the get_gbif_dataset_uuid
-    # function to get a new GBIF dataset UUID.
-    new_row = rgstrs.iloc[-1].copy()
-    new_row["local_dataset_id"] = "edi.929.1"
-    new_row["local_dataset_group_id"] = "edi.929"
-    new_row[
-        "local_dataset_endpoint"
-    ] = "https://pasta.lternet.edu/package/download/eml/edi/929/1"
-    new_row["gbif_dataset_uuid"] = None
-    new_row["is_synchronized"] = False
-    rgstrs = rgstrs.append(new_row, ignore_index=True)
-    # Run the get_gbif_dataset_uuid function and check that it returns the new
-    # GBIF dataset UUID.
-    res = get_gbif_dataset_uuid("edi.929", rgstrs)
-    assert res == gbif_dataset_uuid
-
-
-def test_request_gbif_dataset_uuid_success(mocker):
-    """Test that the request_gbif_dataset_uuid function returns a UUID string
-    when the HTTP request is successful."""
-    mock_response = mocker.Mock()
-    mock_response.status_code = 201
-    mock_response.json.return_value = "4e70c80e-cf22-49a5-8bf7-280994500324"
-    mocker.patch("requests.post", return_value=mock_response)
-    res = request_gbif_dataset_uuid()
-    assert res == "4e70c80e-cf22-49a5-8bf7-280994500324"
-
-
-def test_request_gbif_dataset_uuid_failure(mocker):
-    """Test that the request_gbif_dataset_uuid function returns None when the
-    HTTP request fails."""
-    mock_response = mocker.Mock()
-    mock_response.status_code = 400
-    mock_response.reason = "Bad Request"
-    mocker.patch("requests.post", return_value=mock_response)
-    res = request_gbif_dataset_uuid()
-    assert res is None
+def test_read_registrations_reads_file():
+    """Reads the file."""
+    rgstrs = _read_registrations_file("tests/registrations.csv")
+    assert isinstance(rgstrs, pd.DataFrame)
 
 
 def test_register_dataset_success(
@@ -132,10 +89,10 @@ def test_register_dataset_success(
     # so that the test can modify it without affecting the original file.
     rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
-    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
+    # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     mocker.patch(
-        "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
+        "gbif_registrar.register._get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
     )
 
     # Run the register_dataset function and check that the new row was added
@@ -145,44 +102,7 @@ def test_register_dataset_success(
         local_dataset_id=local_dataset_id,
         registrations_file=tmp_path / "registrations.csv",
     )
-    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
-
-
-def test_complete_registration_records_repairs_failed_registration(
-    tmp_path, rgstrs, mocker, gbif_dataset_uuid
-):
-    """Test that the complete_registration_records repairs a failed
-    registration attempt."""
-
-    # Mock the response from get_gbif_dataset_uuid, so we don't have to make
-    # an actual HTTP request.
-    mocker.patch(
-        "gbif_registrar.register.get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
-    )
-
-    # Simulate a failed registration attempt and write to file for the function
-    # to operate on.
-    rgstrs.iloc[-1, -4:] = None
-    rgstrs.iloc[-1, -1] = False
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
-
-    # Run the function and check that the initial and final registrations files
-    # have the same shape and that the last row has been repaired.
-    complete_registration_records(tmp_path / "registrations.csv")
-    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
-    assert rgstrs_final.shape[0] == rgstrs.shape[0]
-    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
-
-
-def test_complete_registration_records_ignores_complete_registrations(tmp_path, rgstrs):
-    """Test that the complete_registration_records function ignores a complete
-    registrations file."""
-    # Create a copy of the registrations file for the function to operate on.
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
-    complete_registration_records(tmp_path / "registrations.csv")
-    rgstrs_final = read_registrations_file(tmp_path / "registrations.csv")
-    assert rgstrs_final.shape[0] == rgstrs.shape[0]
-    assert rgstrs_final.equals(rgstrs)
