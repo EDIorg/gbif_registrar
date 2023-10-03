@@ -21,7 +21,7 @@ def _check_completeness(rgstrs):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
-    `is_synchronized`, which is not essential for initiating a GBIF
+    `synchronized`, which is not essential for initiating a GBIF
     crawl.
 
     Parameters
@@ -39,7 +39,7 @@ def _check_completeness(rgstrs):
     UserWarning
         If any registrations are incomplete.
     """
-    rgstrs = rgstrs[_expected_cols()].drop(["is_synchronized"], axis=1)
+    rgstrs = rgstrs[_expected_cols()].drop(["synchronized"], axis=1)
     rgstrs = rgstrs[rgstrs.isna().any(axis=1)]
     if len(rgstrs) > 0:
         rows = rgstrs.index.to_series() + 1
@@ -73,12 +73,12 @@ def _check_group_registrations(rgstrs):
     )
 
 
-def _check_is_synchronized(rgstrs):
+def _check_synchronized(rgstrs):
     """Checks if registrations have been synchronized.
 
     Registrations contain all the information needed for GBIF to successfully
     crawl the corresponding dataset and post to the GBIF data portal. Boolean
-    True/False values in the `is_synchronized` field indicate the dataset is
+    True/False values in the `synchronized` field indicate the dataset has been
     synchronized.
 
     Parameters
@@ -95,9 +95,9 @@ def _check_is_synchronized(rgstrs):
     -----
     If a registration has not yet been crawled.
     """
-    if not rgstrs["is_synchronized"].all():
-        rows = rgstrs["is_synchronized"].index.to_series() + 1
-        rows = rows[~rgstrs["is_synchronized"]].astype("string")
+    if not rgstrs["synchronized"].all():
+        rows = rgstrs["synchronized"].index.to_series() + 1
+        rows = rows[~rgstrs["synchronized"]].astype("string")
         warnings.warn("Unsynchronized registrations in rows: " + ", ".join(rows))
 
 
@@ -295,7 +295,7 @@ def _expected_cols():
         "local_dataset_group_id",
         "local_dataset_endpoint",
         "gbif_dataset_uuid",
-        "is_synchronized",
+        "synchronized",
     ]
     return cols
 

@@ -99,7 +99,7 @@ def register_dataset(local_dataset_id, registrations_file):
                 "local_dataset_group_id": None,
                 "local_dataset_endpoint": None,
                 "gbif_dataset_uuid": None,
-                "is_synchronized": False,
+                "synchronized": False,
             },
             index=[0],
         )
@@ -138,7 +138,7 @@ def complete_registration_records(registrations_file):
     registrations = _read_registrations_file(registrations_file)
     # Get all rows where the registrations dataframe columns
     # local_dataset_group_id, local_dataset_endpoint, gbif_dataset_uuid,
-    # is_synchronized contain empty values. These are the rows
+    # synchronized contain empty values. These are the rows
     # that need to be completed.
     record = registrations[
         (registrations["local_dataset_group_id"].isnull())
