@@ -1,15 +1,13 @@
 """A module for validating the registrations file"""
 
 from gbif_registrar.register import _read_registrations_file
-from gbif_registrar._utilities import (
-    _check_completeness,
-    _check_local_dataset_id,
-    _check_group_registrations,
-    _check_local_endpoints,
-    _check_is_synchronized,
-    _check_local_dataset_id_format,
-    _check_local_dataset_group_id_format,
-)
+from gbif_registrar._utilities import _check_completeness
+from gbif_registrar._utilities import _check_local_dataset_id
+from gbif_registrar._utilities import _check_group_registrations
+from gbif_registrar._utilities import _check_local_endpoints
+from gbif_registrar._utilities import _check_is_synchronized
+from gbif_registrar._utilities import _check_local_dataset_id_format
+from gbif_registrar._utilities import _check_local_dataset_group_id_format
 
 
 def validate_registrations(file_path):
