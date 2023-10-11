@@ -294,16 +294,16 @@ def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
     # Add new row to the registrations file with a local dataset group ID that
     # does not have a GBIF dataset UUID to trigger the _get_gbif_dataset_uuid
     # function to get a new GBIF dataset UUID.
-    new_row = {
-        "local_dataset_id": "edi.929.1",
-        "local_dataset_group_id": "edi.929",
-        "gbif_dataset_uuid": None,
-        "local_dataset_endpoint": "https://pasta.lternet.edu/package/download/eml/edi/929/1",
-        "is_synchronized": False,
-    }
-    rgstrs = pd.concat(
-        objs=[rgstrs, pd.DataFrame(new_row, index=[0])], ignore_index=True
+    new_row = pd.DataFrame(
+        {
+            "local_dataset_id": "edi.929.1",
+            "local_dataset_group_id": "edi.929",
+            "local_dataset_endpoint": "https://pasta.lternet.edu/package/download/eml/edi/929/1",
+            "is_synchronized": False,
+        },
+        index=[0],
     )
+    rgstrs = pd.concat(objs=[rgstrs, new_row], ignore_index=True)
     # Run the _get_gbif_dataset_uuid function and check that it returns the new
     # GBIF dataset UUID.
     res = _get_gbif_dataset_uuid("edi.929", rgstrs)

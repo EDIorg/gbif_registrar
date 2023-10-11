@@ -34,7 +34,7 @@ def test_complete_registration_records_repairs_failed_registration(
 
     # Simulate a failed registration attempt and write to file for the function
     # to operate on.
-    rgstrs.iloc[-1, -4:] = None
+    rgstrs.iloc[-1, -4:-1] = None
     rgstrs.iloc[-1, -1] = False
     rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
@@ -77,6 +77,17 @@ def test_read_registrations_reads_file():
     """Reads the file."""
     rgstrs = _read_registrations_file("tests/registrations.csv")
     assert isinstance(rgstrs, pd.DataFrame)
+
+
+def test_read_registrations_casts_dtypes():
+    """Test that the _read_registrations_file function casts the columns to
+    the expected dtypes."""
+    rgstrs = _read_registrations_file("tests/registrations.csv")
+    assert rgstrs["local_dataset_id"].dtype == "string"
+    assert rgstrs["local_dataset_group_id"].dtype == "string"
+    assert rgstrs["local_dataset_endpoint"].dtype == "string"
+    assert rgstrs["gbif_dataset_uuid"].dtype == "string"
+    isinstance(rgstrs["is_synchronized"].dtype, pd.BooleanDtype)
 
 
 def test_register_dataset_success(
