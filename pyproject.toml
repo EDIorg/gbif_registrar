@@ -16,7 +16,7 @@ pandas = ">=1.5.2"
 pylint = ">=2.15.8"
 black = ">=22.10.0"
 sphinx-rtd-theme = ">=1.1.1"
-sphinx-autoapi = ">=2.0.0"
+sphinx-autoapi = ">=3.0.0"
 pytest-mock = "^3.11.1"
 lxml = "^4.9.3"
 
@@ -26,11 +26,11 @@ lxml = "^4.9.3"
 python-semantic-release = ">=7.32.2"
 pytest = ">=7.2.0"
 pytest-cov = ">=4.0.0"
-myst-nb = ">=0.17.1"
-sphinx-autoapi = ">=2.0.0"
+sphinx-autoapi = ">=3.0.0"
 sphinx-rtd-theme = ">=1.1.1"
 pylint = ">=2.15.8"
 black = ">=22.10.0"
+myst-parser = "^2.0.0"
 
 [tool.semantic_release]
 version_variable = "pyproject.toml:version" # version location

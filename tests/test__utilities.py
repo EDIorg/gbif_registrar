@@ -184,15 +184,18 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that _is_synchronized can access this information via the
     # registrations_file argument.
+
     local_dataset_id = "edi.941.3"
-    new_row = registrations.iloc[-1].copy()
-    new_row["local_dataset_id"] = local_dataset_id
-    new_row["local_dataset_group_id"] = "edi.941"
-    new_row["gbif_dataset_uuid"] = "cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485"
-    new_row[
-        "local_dataset_endpoint"
-    ] = "https://pasta-s.lternet.edu/package/data/eml/edi/941/3"
-    registrations = registrations.append(new_row, ignore_index=True)
+    new_row = {
+        "local_dataset_id": local_dataset_id,
+        "local_dataset_group_id": "edi.941",
+        "gbif_dataset_uuid": "cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485",
+        "local_dataset_endpoint": "https://pasta-s.lternet.edu/package/data/eml/edi/941/3",
+        "is_synchronized": True,
+    }
+    registrations = pd.concat(
+        objs=[registrations, pd.DataFrame(new_row, index=[0])], ignore_index=True
+    )
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
 
     # Mock the response from _read_local_dataset_metadata and
@@ -291,15 +294,16 @@ def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
     # Add new row to the registrations file with a local dataset group ID that
     # does not have a GBIF dataset UUID to trigger the _get_gbif_dataset_uuid
     # function to get a new GBIF dataset UUID.
-    new_row = rgstrs.iloc[-1].copy()
-    new_row["local_dataset_id"] = "edi.929.1"
-    new_row["local_dataset_group_id"] = "edi.929"
-    new_row[
-        "local_dataset_endpoint"
-    ] = "https://pasta.lternet.edu/package/download/eml/edi/929/1"
-    new_row["gbif_dataset_uuid"] = None
-    new_row["is_synchronized"] = False
-    rgstrs = rgstrs.append(new_row, ignore_index=True)
+    new_row = pd.DataFrame(
+        {
+            "local_dataset_id": "edi.929.1",
+            "local_dataset_group_id": "edi.929",
+            "local_dataset_endpoint": "https://pasta.lternet.edu/package/download/eml/edi/929/1",
+            "is_synchronized": False,
+        },
+        index=[0],
+    )
+    rgstrs = pd.concat(objs=[rgstrs, new_row], ignore_index=True)
     # Run the _get_gbif_dataset_uuid function and check that it returns the new
     # GBIF dataset UUID.
     res = _get_gbif_dataset_uuid("edi.929", rgstrs)

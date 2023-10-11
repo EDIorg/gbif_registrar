@@ -603,7 +603,18 @@ def _read_registrations_file(registrations_file):
     DataFrame
         The registrations file as a Pandas dataframe.
     """
-    return pd.read_csv(registrations_file, delimiter=",")
+    registrations = pd.read_csv(
+        registrations_file,
+        delimiter=",",
+        dtype={
+            "local_dataset_id": "string",
+            "local_dataset_group_id": "string",
+            "local_dataset_endpoint": "string",
+            "gbif_dataset_uuid": "string",
+            "is_synchronized": "boolean",
+        },
+    )
+    return registrations
 
 
 def _request_gbif_dataset_uuid():

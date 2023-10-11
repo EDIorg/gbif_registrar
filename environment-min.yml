@@ -3,21 +3,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - wheel=0.38.4
-  - python=3.9.15
-  - tk=8.6.12
-  - libsqlite=3.40.0
-  - setuptools=65.5.1
-  - tzdata=2022g
-  - pip=22.3.1
-  - bzip2=1.0.8
-  - xz=5.2.6
-  - libffi=3.4.2
-  - libzlib=1.2.13
-  - openssl
-  - readline=8.1.2
-  - ncurses=6.3
-  - ca-certificates
+  - python=3.9
+  - pandas
+  - pylint
+  - black
+  - sphinx-rtd-theme
+  - sphinx-autoapi
   - pytest-mock
   - lxml
+  - myst-parser
 prefix: /opt/miniconda3/envs/gbif_registrar
