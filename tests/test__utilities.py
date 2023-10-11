@@ -194,8 +194,7 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
         "is_synchronized": True,
     }
     registrations = pd.concat(
-        objs=[registrations, pd.DataFrame(new_row, index=[0])],
-        ignore_index=True
+        objs=[registrations, pd.DataFrame(new_row, index=[0])], ignore_index=True
     )
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
 
@@ -303,8 +302,7 @@ def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
         "is_synchronized": False,
     }
     rgstrs = pd.concat(
-        objs=[rgstrs, pd.DataFrame(new_row, index=[0])],
-        ignore_index=True
+        objs=[rgstrs, pd.DataFrame(new_row, index=[0])], ignore_index=True
     )
     # Run the _get_gbif_dataset_uuid function and check that it returns the new
     # GBIF dataset UUID.
