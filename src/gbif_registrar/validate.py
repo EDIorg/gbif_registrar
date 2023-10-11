@@ -5,7 +5,7 @@ from gbif_registrar._utilities import _check_completeness
 from gbif_registrar._utilities import _check_local_dataset_id
 from gbif_registrar._utilities import _check_group_registrations
 from gbif_registrar._utilities import _check_local_endpoints
-from gbif_registrar._utilities import _check_is_synchronized
+from gbif_registrar._utilities import _check_synchronized
 from gbif_registrar._utilities import _check_local_dataset_id_format
 from gbif_registrar._utilities import _check_local_dataset_group_id_format
 
@@ -15,7 +15,7 @@ def validate_registrations(file_path):
 
     This is a wrapper to `_check_completeness`, `_check_local_dataset_id`,
     `_check_group_registrations`, `_check_local_endpoints`, and
-    `_check_is_synchronized`.
+    `_check_synchronized`.
 
     Parameters
     ----------
@@ -40,6 +40,6 @@ def validate_registrations(file_path):
     _check_local_dataset_id(rgstrs)
     _check_group_registrations(rgstrs)
     _check_local_endpoints(rgstrs)
-    _check_is_synchronized(rgstrs)
+    _check_synchronized(rgstrs)
     _check_local_dataset_id_format(rgstrs)
     _check_local_dataset_group_id_format(rgstrs)

@@ -16,7 +16,7 @@ from gbif_registrar._utilities import (
     _check_completeness,
     _check_local_dataset_id,
     _check_one_to_one_cardinality,
-    _check_is_synchronized,
+    _check_synchronized,
     _check_local_dataset_id_format,
     _check_local_dataset_group_id_format,
     _read_registrations_file,
@@ -90,17 +90,17 @@ def test_check_is_synchronized_valid(rgstrs):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_is_synchronized(rgstrs)
+        _check_synchronized(rgstrs)
         assert len(warns) == 0
 
 
 def test_check_is_synchronized_warn(rgstrs):
     """Unsynchronized registrations result in a warning."""
-    rgstrs.loc[0, "is_synchronized"] = False
-    rgstrs.loc[2, "is_synchronized"] = False
+    rgstrs.loc[0, "synchronized"] = False
+    rgstrs.loc[2, "synchronized"] = False
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_is_synchronized(rgstrs)
+        _check_synchronized(rgstrs)
         assert "Unsynchronized registrations in rows" in str(warns[0].message)
         assert "1, 3" in str(warns[0].message)
 
