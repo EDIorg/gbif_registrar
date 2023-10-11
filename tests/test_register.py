@@ -87,7 +87,7 @@ def test_read_registrations_casts_dtypes():
     assert rgstrs["local_dataset_group_id"].dtype == "string"
     assert rgstrs["local_dataset_endpoint"].dtype == "string"
     assert rgstrs["gbif_dataset_uuid"].dtype == "string"
-    isinstance(rgstrs["is_synchronized"].dtype, pd.BooleanDtype)
+    isinstance(rgstrs["synchronized"].dtype, pd.BooleanDtype)
 
 
 def test_register_dataset_success(
