@@ -117,3 +117,29 @@ def test_register_dataset_success(
     assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert rgstrs_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
+
+
+def test_register_dataset_failure(local_dataset_id, tmp_path, rgstrs, mocker):
+    """Test that the register_dataset function returns a file with a new row
+    containing the local_dataset_id, but with the gbif_dataset_uuid value
+    set to NA."""
+
+    # Create a copy of the registrations file in the temporary test directory
+    # so that the test can modify it without affecting the original file.
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+
+    # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    mocker.patch("gbif_registrar.register._get_gbif_dataset_uuid", return_value=None)
+
+    # Run the register_dataset function and check that the new row was added
+    # to the registrations file, and that the new row contains the local
+    # dataset ID and no GBIF registration number.
+    register_dataset(
+        local_dataset_id=local_dataset_id,
+        registrations_file=tmp_path / "registrations.csv",
+    )
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
+    assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
+    assert pd.isna(rgstrs_final.iloc[-1]["gbif_dataset_uuid"])
