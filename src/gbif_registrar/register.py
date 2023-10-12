@@ -141,9 +141,9 @@ def complete_registration_records(registrations_file):
     # synchronized contain empty values. These are the rows
     # that need to be completed.
     record = registrations[
-        (registrations["local_dataset_group_id"].isnull())
-        | (registrations["local_dataset_endpoint"].isnull())
-        | (registrations["gbif_dataset_uuid"].isnull())
+        (registrations["local_dataset_group_id"].isna())
+        | (registrations["local_dataset_endpoint"].isna())
+        | (registrations["gbif_dataset_uuid"].isna())
     ]
     # If the record dataframe is empty, then there are no rows to complete.
     # Return the registrations dataframe.
@@ -156,7 +156,7 @@ def complete_registration_records(registrations_file):
         # _get_local_dataset_group_id function to get the local_dataset_group_id
         # value and insert it into the local_dataset_group_id column of the
         # registrations dataframe.
-        if pd.isnull(row["local_dataset_group_id"]):
+        if pd.isna(row["local_dataset_group_id"]):
             local_dataset_group_id = _get_local_dataset_group_id(
                 local_dataset_id=row["local_dataset_id"]
             )
@@ -167,7 +167,7 @@ def complete_registration_records(registrations_file):
         # _get_local_dataset_endpoint function to get the local_dataset_endpoint
         # value and insert it into the local_dataset_endpoint column of the
         # registrations dataframe.
-        if pd.isnull(row["local_dataset_endpoint"]):
+        if pd.isna(row["local_dataset_endpoint"]):
             local_dataset_endpoint = _get_local_dataset_endpoint(
                 local_dataset_id=row["local_dataset_id"]
             )
@@ -178,7 +178,7 @@ def complete_registration_records(registrations_file):
         # _get_gbif_dataset_uuid function to get the gbif_dataset_uuid value and
         # insert it into the gbif_dataset_uuid column of the registrations
         # dataframe.
-        if pd.isnull(row["gbif_dataset_uuid"]):
+        if pd.isna(row["gbif_dataset_uuid"]):
             gbif_dataset_uuid = _get_gbif_dataset_uuid(
                 local_dataset_group_id=registrations.loc[
                     index, "local_dataset_endpoint"
