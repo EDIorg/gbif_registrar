@@ -9,6 +9,10 @@ from gbif_registrar._utilities import (
     _read_registrations_file,
     _is_synchronized,
 )
+from gbif_registrar.config import (
+    GBIF_DATASET_BASE_URL,
+    REGISTRY_BASE_URL
+)
 
 
 def upload_dataset(local_dataset_id, registrations_file):
@@ -39,6 +43,14 @@ def upload_dataset(local_dataset_id, registrations_file):
     # process.
     with open(registrations_file, "r", encoding="utf-8") as registrations:
         registrations = _read_registrations_file(registrations_file)
+
+    # Stop if not registered
+    if local_dataset_id not in registrations["local_dataset_id"].values:
+        print("The local dataset ID is not in the registrations file. "
+              "Registration is required first.")
+        return None
+
+    # Obtain relevant information for the upload process from the registrations
     gbif_dataset_uuid = registrations[local_dataset_id]["gbif_dataset_uuid"]
     local_dataset_endpoint = registrations[local_dataset_id]["local_dataset_endpoint"]
     local_dataset_group_id = registrations[local_dataset_id]["local_dataset_group_id"]
@@ -49,13 +61,12 @@ def upload_dataset(local_dataset_id, registrations_file):
     has_metadata = _has_metadata(gbif_dataset_uuid)
     if has_metadata:
         print(
-            f"The {local_dataset_group_id} dataset group already exists on "
-            f"GBIF. This is not a new dataset group."
+            f"The {local_dataset_group_id} dataset group exists on GBIF."
         )
     else:
         print(
             f"The {local_dataset_group_id} dataset group does not exist on "
-            f"GBIF. This is a new dataset group."
+            f"GBIF"
         )
 
     # Check if the local_dataset_id is already synchronized with GBIF and stop
@@ -65,12 +76,18 @@ def upload_dataset(local_dataset_id, registrations_file):
             f"{local_dataset_id} is already synchronized with GBIF. Skipping"
             f" the upload process."
         )
+        # Write the synchronization status to the registrations file to handle
+        # the case of a successful upload but timed out synchronization
+        # check, which would result in the status being False in the
+        # registrations file.
+        if registrations[local_dataset_id]["synchronized"] is False:
+            registrations[local_dataset_id]["synchronized"] = True
+            registrations.to_csv(registrations_file, index=False, mode="w")
+            print(
+                f"Updated the registrations file with the new synchronization "
+                f"status of {local_dataset_id}."
+            )
         return None
-
-    # TODO Recheck synchronization status. It could be the case that a
-    #  previous synchronization check hadn't returned a positive result
-    #  because the upload hadn't finished yet and therefore wasn't written to
-    #  the  registration file that logs this information.
 
     # Clear the list of local endpoints so when the endpoint is added below,
     # it will result in only one being listed on the GBIF dataset landing page.
@@ -97,13 +114,16 @@ def upload_dataset(local_dataset_id, registrations_file):
         _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
         print(f"Posted new metadata document for {local_dataset_id} to GBIF.")
 
+    # TODO adjust max number of retries to the average synchronization time
+    #  to increase chances of success while avoiding infinite loops. But also
+    #  allow users to set the max number of retries for their system.
     # Run the is_synchronized function until a True value is returned or the
     # max number of attempts is reached.
     synchronized = False
-    max_attempts = 10
+    max_attempts = 1
     attempts = 0
     while not synchronized and attempts < max_attempts:
-        sleep(10)
+        sleep(1)
         print(f"Checking if {local_dataset_id} is synchronized with GBIF.")
         synchronized = _is_synchronized(local_dataset_id, registrations_file)
         attempts += 1
@@ -119,8 +139,11 @@ def upload_dataset(local_dataset_id, registrations_file):
             f"status of {local_dataset_id}."
         )
         print(f"Upload of {local_dataset_id} to GBIF is complete!")
-        # TODO Add link to GBIF page
+        print("View the dataset on GBIF at:", GBIF_DATASET_BASE_URL + "/" +
+              gbif_dataset_uuid)
     else:
-        print(f"{local_dataset_id} is not synchronized with GBIF. The maximum ")
-        # TODO Link to the GBIF log page (here or at file head?)
+        print(f"Checks on the synchronization status of {local_dataset_id} "
+              f"with GBIF timed out. Please check back later.")
+    print(f"For more information, see the GBIF log page for "
+          f"{local_dataset_id}:", REGISTRY_BASE_URL + "/" + gbif_dataset_uuid)
     return None
