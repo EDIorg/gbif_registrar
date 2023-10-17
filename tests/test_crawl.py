@@ -22,6 +22,8 @@ def test_upload_dataset():
 
 
 # TODO add the capsys fixture to the function signature
+# TODO Note, for debugging, turn capsys off to see print statements. Turn it on
+#  to see the test results.
 def test_upload_dataset_real_requests(rgstrs, tmp_path):
     """Test that the upload_dataset function works as expected using real HTTP
     requests.
