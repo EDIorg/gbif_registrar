@@ -181,7 +181,7 @@ def complete_registration_records(registrations_file):
         if pd.isna(row["gbif_dataset_uuid"]):
             gbif_dataset_uuid = _get_gbif_dataset_uuid(
                 local_dataset_group_id=registrations.loc[
-                    index, "local_dataset_endpoint"
+                    index, "local_dataset_group_id"
                 ],
                 rgstrs=registrations,
             )
