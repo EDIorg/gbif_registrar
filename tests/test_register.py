@@ -32,10 +32,12 @@ def test_complete_registration_records_repairs_failed_registration(
         "gbif_registrar.register._get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
     )
 
-    # Simulate a failed registration attempt and write to file for the function
-    # to operate on.
+    # Simulate two failed registration attempts and write to file for the
+    # function to operate on.
     rgstrs.iloc[-1, -4:-1] = None
     rgstrs.iloc[-1, -1] = False
+    rgstrs.iloc[-2, -4:-1] = None
+    rgstrs.iloc[-2, -1] = False
     rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
 
     # Run the function and check that the initial and final registrations files
@@ -44,6 +46,7 @@ def test_complete_registration_records_repairs_failed_registration(
     rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
     assert rgstrs_final.shape[0] == rgstrs.shape[0]
     assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
+    assert rgstrs_final.iloc[-2, -4:-1].notnull().all()
 
 
 def test_complete_registration_records_operates_on_one_dataset(
