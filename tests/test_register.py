@@ -80,6 +80,24 @@ def test_complete_registration_records_operates_on_one_dataset(
     assert rgstrs_final.iloc[-2, -4:-1].isnull().all()
 
 
+def test_complete_registration_records_handles_empty_dataframe(tmp_path, rgstrs, local_dataset_id):
+    """Test that the complete_registration_records function handles a
+    registrations file containing only a local_dataset_id."""
+    # FIXME: Mock the HTTP call to get the gbif_dataset_uuid
+    # Create an empty registrations file for the function to operate on.
+    rgstrs = rgstrs.iloc[0:0]
+    rgstrs = pd.concat([rgstrs, pd.DataFrame({"local_dataset_id": [local_dataset_id]})])
+    rgstrs['synchronized'] = False
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    # Run the function and check that the initial and final registrations files
+    # have the same shape and that the last row has been repaired.
+    complete_registration_records(tmp_path / "registrations.csv")
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    assert rgstrs_final.shape[0] == rgstrs.shape[0]
+    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
+
+
+
 def test_initialize_registrations_file_does_not_overwrite(tmp_path):
     """Does not overwrite."""
     file = tmp_path / "registrations.csv"
