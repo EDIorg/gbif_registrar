@@ -96,20 +96,18 @@ def register_dataset(local_dataset_id, registrations_file):
         new_record = pd.DataFrame(
             {
                 "local_dataset_id": local_dataset_id,
-                "local_dataset_group_id": None,
-                "local_dataset_endpoint": None,
-                "gbif_dataset_uuid": None,
                 "synchronized": False,
             },
             index=[0],
         )
-        # Write the new_record dataframe to a .csv file in the temp directory
-        # so that the complete_registration_records function can read it.
-        with tempfile.NamedTemporaryFile(suffix=".csv", delete=True) as temp_file:
-            new_record.to_csv(temp_file.name, index=False, mode="w")
-            complete_registration_records(temp_file.name)
-            new_record = _read_registrations_file(temp_file.name)
+        # Add the new record to the registrations dataframe and write it to
+        # the temp directory as a .csv file so that the
+        # complete_registration_records function can read it.
         registrations = pd.concat([registrations, new_record], ignore_index=True)
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=True) as temp_file:
+            registrations.to_csv(temp_file.name, index=False, mode="w")
+            complete_registration_records(temp_file.name, local_dataset_id)
+            registrations = _read_registrations_file(temp_file.name)
         registrations.to_csv(registrations_file, index=False, mode="w")
     return None
 
