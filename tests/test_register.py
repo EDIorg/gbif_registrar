@@ -46,6 +46,37 @@ def test_complete_registration_records_repairs_failed_registration(
     assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
 
 
+def test_complete_registration_records_operates_on_one_dataset(
+    tmp_path, rgstrs, mocker, gbif_dataset_uuid
+):
+    """Test that the complete_registration_records function operates on a
+    single local_dataset_id when specified."""
+    # Create a registrations file with two incomplete registrations to test
+    # that when specified the function only operates on the specified
+    # local_dataset_id.
+    rgstrs.iloc[-1, -4:-1] = None  # Make last row incomplete
+    rgstrs.iloc[-1, -1] = False
+    rgstrs.iloc[-2, -4:-1] = None  # Make second to last row incomplete
+    rgstrs.iloc[-2, -1] = False
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
+    # an actual HTTP request.
+    mocker.patch(
+        "gbif_registrar.register._get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
+    )
+    # Run the function and check that the initial and final registrations files
+    # have the same shape and that the last row has been repaired.
+    local_dataset_id = rgstrs.iloc[-1]["local_dataset_id"]
+    complete_registration_records(
+        registrations_file=tmp_path / "registrations.csv",
+        local_dataset_id=local_dataset_id,
+    )
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    assert rgstrs_final.shape[0] == rgstrs.shape[0]
+    assert rgstrs_final.iloc[-1, -4:-1].notnull().all()
+    assert rgstrs_final.iloc[-2, -4:-1].isnull().all()
+
+
 def test_initialize_registrations_file_does_not_overwrite(tmp_path):
     """Does not overwrite."""
     file = tmp_path / "registrations.csv"

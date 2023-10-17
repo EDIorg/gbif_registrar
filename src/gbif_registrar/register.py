@@ -114,7 +114,7 @@ def register_dataset(local_dataset_id, registrations_file):
     return None
 
 
-def complete_registration_records(registrations_file):
+def complete_registration_records(registrations_file, local_dataset_id=None):
     """Return a completed set of registration records.
 
     This function can be run to repair one or more registrations that have
@@ -125,6 +125,11 @@ def complete_registration_records(registrations_file):
     ----------
     registrations_file : str
         The path of the registrations file.
+    local_dataset_id : str, optional
+        The dataset identifier in the EDI repository. Has the format:
+        {scope}.{identifier}.{revision}. If provided, only the registration
+        record for the local_dataset_id will be completed. If not provided,
+        all registration records with missing values will be completed.
 
     Returns
     -------
@@ -133,7 +138,10 @@ def complete_registration_records(registrations_file):
 
     Examples
     --------
+    >>> # Complete all registration records with missing values.
     >>> complete_registration_records("registrations.csv")
+    >>> # Complete the registration record for the local_dataset_id.
+    >>> complete_registration_records("registrations.csv", "edi.929.2")
     """
     registrations = _read_registrations_file(registrations_file)
     # Get all rows where the registrations dataframe columns
@@ -149,6 +157,12 @@ def complete_registration_records(registrations_file):
     # Return the registrations dataframe.
     if record.empty:
         return None
+    # Only operate on the registration record for the local_dataset_id if it
+    # was provided.
+    if local_dataset_id is not None:
+        if local_dataset_id not in set(record["local_dataset_id"]):
+            return None
+        record = record[record["local_dataset_id"] == local_dataset_id]
     # If the record dataframe is not empty, then there are rows to complete.
     # Iterate through the rows of the record dataframe.
     for index, row in record.iterrows():
