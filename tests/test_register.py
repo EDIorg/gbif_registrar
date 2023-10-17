@@ -201,3 +201,28 @@ def test_register_dataset_failure(local_dataset_id, tmp_path, rgstrs, mocker):
     assert rgstrs_final.shape[0] == rgstrs.shape[0] + 1
     assert rgstrs_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert pd.isna(rgstrs_final.iloc[-1]["gbif_dataset_uuid"])
+
+
+def test_register_dataset_reuses_uuid_for_updates(tmp_path, rgstrs):
+    """Test that the register_dataset function reuses the gbif_dataset_uuid
+    for members of the same local_dataset_group_id. This is necessary for
+    updating the metadata and endpoints of a dataset group in GBIF."""
+    # Create a copy of the registrations file in the temporary test directory
+    # so that the test can modify it without affecting the original file.
+    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    # Register a revision of the dataset group and check that the UUID is
+    # the same as the original registration.
+    old_local_dataset_id = "edi.941.3"
+    old_gbif_dataset_uuid = rgstrs[rgstrs["local_dataset_id"] == old_local_dataset_id][
+        "gbif_dataset_uuid"
+    ]
+    new_local_dataset_id = "edi.941.4"
+    register_dataset(
+        local_dataset_id=new_local_dataset_id,
+        registrations_file=tmp_path / "registrations.csv",
+    )
+    rgstrs_final = _read_registrations_file(tmp_path / "registrations.csv")
+    new_gbif_dataset_uuid = rgstrs_final[
+        rgstrs_final["local_dataset_id"] == new_local_dataset_id
+    ]["gbif_dataset_uuid"]
+    assert old_gbif_dataset_uuid.values == new_gbif_dataset_uuid.values
