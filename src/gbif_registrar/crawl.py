@@ -1,13 +1,7 @@
 """Functions for calling a GBIF crawl."""
 
 from time import sleep
-from gbif_registrar._utilities import (
-    _post_new_metadata_document,
-    _post_local_dataset_endpoint,
-    _delete_local_dataset_endpoints,
-    _read_registrations_file,
-    _is_synchronized,
-)
+from gbif_registrar import _utilities
 from gbif_registrar.config import GBIF_DATASET_BASE_URL, REGISTRY_BASE_URL
 
 
@@ -41,7 +35,7 @@ def upload_dataset(local_dataset_id, registrations_file):
     # Read the registrations file to obtain relevant information for the upload
     # process.
     with open(registrations_file, "r", encoding="utf-8") as registrations:
-        registrations = _read_registrations_file(registrations_file)
+        registrations = _utilities._read_registrations_file(registrations_file)
 
     # Stop if not registered
     if local_dataset_id not in registrations["local_dataset_id"].values:
@@ -67,25 +61,36 @@ def upload_dataset(local_dataset_id, registrations_file):
             f"{local_dataset_id} is already synchronized with GBIF. Skipping"
             f" the upload process."
         )
-        # Write the synchronization status to the registrations file to handle
-        # the case of a successful upload but timed out synchronization
+        return None
+
+    # There is a latency in the initialization of a data package group on GBIF
+    # that can result in the is_synchronized function failing on string parsing
+    # errors. This case is unlikely to occur under other contexts than
+    # upload_dataset, so we handle it here.
+    try:
+        synchronized = _utilities._is_synchronized(local_dataset_id, registrations_file)
+    except:
+        synchronized = False
+    if synchronized:
+        # Handle the case of a successful upload but timed out synchronization
         # check, which would result in the status being False in the
         # registrations file.
-        # FIXME: These don't index the correct data. Use the index variable
-        #  instead (declared above).
-        if registrations[local_dataset_id]["synchronized"] is False:
-            registrations[local_dataset_id]["synchronized"] = True
+        index = registrations.index[
+            registrations["local_dataset_id"] == local_dataset_id
+        ].tolist()[0]
+        if not registrations.loc[index, "synchronized"]:
+            registrations.loc[index, "synchronized"] = True
             registrations.to_csv(registrations_file, index=False, mode="w")
             print(
-                f"Updated the registrations file with the new synchronization "
-                f"status of {local_dataset_id}."
+                f"Updated the registrations file with the missing "
+                f"synchronization status of {local_dataset_id}."
             )
-        return None
+            return None
 
     # Clear the list of local endpoints so when the endpoint is added below,
     # it will result in only one being listed on the GBIF dataset landing page.
     # Multiple listings could be confusing to end users.
-    _delete_local_dataset_endpoints(gbif_dataset_uuid)
+    _utilities._delete_local_dataset_endpoints(gbif_dataset_uuid)
     print("Deleted local dataset endpoints from GBIF.")
 
     # Post the local dataset endpoint to GBIF. This will initiate a crawl of
@@ -93,31 +98,31 @@ def upload_dataset(local_dataset_id, registrations_file):
     # subsequent posts (updates). In the latter case, the local dataset
     # landing page metadata will also need to be posted to update the GBIF
     # landing page (below).
-    _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid)
+    _utilities._post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid)
     print(f"Posted local dataset endpoint {local_dataset_endpoint} to GBIF.")
 
     # For revised datasets, post a new metadata document to update the GBIF
     # landing page. This is necessary because GBIF doesn't "re-crawl" the
     # local dataset metadata when the new local dataset endpoint is updated.
-    _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
+    _utilities._post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
     print(f"Posted new metadata document for {local_dataset_id} to GBIF.")
 
     # Run the is_synchronized function until a True value is returned or the
     # max number of attempts is reached.
     synchronized = False
-    max_attempts = 6  # Average synchronization time is 20 seconds
+    max_attempts = 12  # Average synchronization time is 20 seconds
     attempts = 0
     while not synchronized and attempts < max_attempts:
         print(f"Checking if {local_dataset_id} is synchronized with GBIF.")
-        synchronized = _is_synchronized(local_dataset_id, registrations_file)
+        synchronized = _utilities._is_synchronized(local_dataset_id, registrations_file)
         attempts += 1
-        sleep(10)
+        sleep(5)
 
     # Update the registrations file with the new status
     if synchronized:
         print(f"{local_dataset_id} is synchronized with GBIF.")
         with open(registrations_file, "r", encoding="utf-8") as registrations:
-            registrations = _read_registrations_file(registrations_file)
+            registrations = _utilities._read_registrations_file(registrations_file)
         registrations.loc[index, "synchronized"] = True
         registrations.to_csv(registrations_file, index=False, mode="w")
         print(

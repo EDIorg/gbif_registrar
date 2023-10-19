@@ -1,5 +1,6 @@
 """Configure the test suite."""
 
+from re import search
 import pytest
 from gbif_registrar._utilities import _read_registrations_file
 
@@ -65,6 +66,34 @@ def local_dataset_id_fixture():
     # This local_dataset_id corresponds to a data package archived on EDI and
     # formatted according to the DwCA-Event core.
     return "edi.929.2"
+
+
+@pytest.fixture(name="mock_update_dataset_success")
+def mock_update_dataset_success_fixture(
+    mocker, gbif_dataset_uuid, local_dataset_id, tmp_path
+):
+    """Create a mock_update_dataset_success fixture for tests that use a
+    similar pattern of calls to the GBIF API."""
+    mocker.patch(
+        "gbif_registrar.register._get_gbif_dataset_uuid", return_value=gbif_dataset_uuid
+    )
+    mocker.patch(
+        "gbif_registrar._utilities._delete_local_dataset_endpoints", return_value=None
+    )
+    mocker.patch(
+        "gbif_registrar._utilities._post_local_dataset_endpoint", return_value=None
+    )
+    mocker.patch(
+        "gbif_registrar._utilities._post_new_metadata_document", return_value=None
+    )
+    # The alternating side effects (below) are required to pass the first
+    # synchronization check and continue on to the second synchronization
+    # check. We list this pattern twice because update_dataset() is called
+    # twice in the test.
+    mocker.patch(
+        "gbif_registrar._utilities._is_synchronized",
+        side_effect=[False, True, False, True],
+    )
 
 
 @pytest.fixture(name="rgstrs")
