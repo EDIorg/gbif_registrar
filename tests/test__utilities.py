@@ -1,12 +1,10 @@
 """Test utilities"""
 
-from json import loads
 import warnings
 import numpy as np
 import pandas as pd
 from gbif_registrar._utilities import (
     _read_local_dataset_metadata,
-    _has_metadata,
     _read_gbif_dataset_metadata,
     _is_synchronized,
     _get_local_dataset_group_id,
@@ -140,42 +138,6 @@ def test_check_local_dataset_group_id_format_warn(rgstrs):
         _check_local_dataset_group_id_format(rgstrs)
         assert "Invalid local_dataset_group_id values in rows" in str(warns[0].message)
         assert "1" in str(warns[0].message)
-
-
-def test_has_metadata_success(mocker):
-    """Test that _has_metadata returns True on success."""
-    mock_response = loads("""{"title":"This is a title"}""")
-    mocker.patch(
-        "gbif_registrar._utilities._read_gbif_dataset_metadata",
-        return_value=mock_response,
-    )
-    res = _has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
-    assert isinstance(res, bool)
-
-
-def test_has_metadata_failure(mocker):
-    """Test that _has_metadata returns False on failure.
-
-    Failure occurs if the response doesn't contain a title or the response is
-    None."""
-
-    # Case 1: Response from _read_gbif_dataset_metadata doesn't contain a title
-    mock_response = loads("""{"description":"This is a description"}""")
-    mocker.patch(
-        "gbif_registrar._utilities._read_gbif_dataset_metadata",
-        return_value=mock_response,
-    )
-    res = _has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
-    assert res is False
-
-    # Case 2: Response from _read_gbif_dataset_metadata is None
-    mock_response = None
-    mocker.patch(
-        "gbif_registrar._utilities._read_gbif_dataset_metadata",
-        return_value=mock_response,
-    )
-    res = _has_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
-    assert res is False
 
 
 def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
