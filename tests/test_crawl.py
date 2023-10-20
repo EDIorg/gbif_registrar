@@ -66,7 +66,12 @@ def test_upload_dataset_real_requests(rgstrs, tmp_path, capsys):
 
 
 def test_upload_dataset_mocks(
-    rgstrs, tmp_path, capsys, mocker, gbif_dataset_uuid, mock_update_dataset_success
+    rgstrs,
+    tmp_path,
+    capsys,
+    mocker,
+    gbif_dataset_uuid,
+    mock_update_dataset_success,  # pylint: disable=unused-argument
 ):
     """Test that the upload_dataset function works, for the new and updated
      dataset cases, using mocked HTTP requests.

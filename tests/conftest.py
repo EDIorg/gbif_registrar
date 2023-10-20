@@ -1,6 +1,5 @@
 """Configure the test suite."""
 
-from re import search
 import pytest
 from gbif_registrar._utilities import _read_registrations_file
 
@@ -69,9 +68,7 @@ def local_dataset_id_fixture():
 
 
 @pytest.fixture(name="mock_update_dataset_success")
-def mock_update_dataset_success_fixture(
-    mocker, gbif_dataset_uuid, local_dataset_id, tmp_path
-):
+def mock_update_dataset_success_fixture(mocker, gbif_dataset_uuid):
     """Create a mock_update_dataset_success fixture for tests that use a
     similar pattern of calls to the GBIF API."""
     mocker.patch(

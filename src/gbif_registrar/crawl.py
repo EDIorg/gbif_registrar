@@ -69,7 +69,7 @@ def upload_dataset(local_dataset_id, registrations_file):
     # upload_dataset, so we handle it here.
     try:
         synchronized = _utilities._is_synchronized(local_dataset_id, registrations_file)
-    except:
+    except AttributeError:
         synchronized = False
     if synchronized:
         # Handle the case of a successful upload but timed out synchronization
