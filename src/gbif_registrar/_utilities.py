@@ -403,30 +403,6 @@ def _get_local_dataset_group_id(local_dataset_id):
     return local_dataset_group_id
 
 
-def _has_metadata(gbif_dataset_uuid):
-    """Check if a GBIF dataset has a metadata document.
-
-    Parameters
-    ----------
-    gbif_dataset_uuid : str
-        The registration identifier assigned by GBIF to the local dataset.
-
-    Returns
-    -------
-    bool
-        True if the dataset has a metadata document, False otherwise.
-
-    Notes
-    -----
-    The presence of a dataset title indicates that the dataset has been
-    crawled by GBIF and the metadata document has been created.
-    """
-    metadata = _read_gbif_dataset_metadata(gbif_dataset_uuid)
-    if metadata:
-        return bool(metadata.get("title"))
-    return False
-
-
 def _is_synchronized(local_dataset_id, file_path):
     """Check if a local dataset is synchronized with the GBIF registry.
 
