@@ -44,7 +44,7 @@ remove_dist = false                         # don't remove dists
 patch_without_tag = true                    # patch release by default
 
 [tool.pylint.'MESSAGES CONTROL']
-disable = "c-extension-no-member"
+disable = "c-extension-no-member, protected-access, too-many-arguments"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
