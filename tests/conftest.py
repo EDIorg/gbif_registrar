@@ -93,7 +93,7 @@ def mock_update_dataset_success_fixture(mocker, gbif_dataset_uuid):
     )
 
 
-@pytest.fixture(name="rgstrs")
-def rgstrs_fixture():
+@pytest.fixture(name="registrations")
+def registrations_fixture():
     """Read the test registrations file into DataFrame fixture."""
     return _read_registrations_file("tests/registrations.csv")

@@ -36,7 +36,7 @@ def assert_successful_upload(captured, tmp_path, local_dataset_id):
 
 
 @pytest.mark.skip(reason="Makes real HTTP requests. Run this manually.")
-def test_upload_dataset_real_requests(rgstrs, tmp_path, capsys):
+def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     """Test that the upload_dataset function works, for the new and updated
      dataset cases, using real HTTP requests.
 
@@ -46,8 +46,8 @@ def test_upload_dataset_real_requests(rgstrs, tmp_path, capsys):
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
-    rgstrs = rgstrs[rgstrs["local_dataset_group_id"] != "edi.941"]
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    registrations = registrations[registrations["local_dataset_group_id"] != "edi.941"]
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
     # Register edi.941.3 to create a new dataset group on GBIF to upload to.
     local_dataset_id = "edi.941.3"
     register_dataset(local_dataset_id, tmp_path / "registrations.csv")
@@ -66,7 +66,7 @@ def test_upload_dataset_real_requests(rgstrs, tmp_path, capsys):
 
 
 def test_upload_dataset_mocks(
-    rgstrs,
+    registrations,
     tmp_path,
     capsys,
     mocker,
@@ -83,8 +83,8 @@ def test_upload_dataset_mocks(
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
-    rgstrs = rgstrs[rgstrs["local_dataset_group_id"] != "edi.941"]
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    registrations = registrations[registrations["local_dataset_group_id"] != "edi.941"]
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
     # Register edi.941.3 to create a new dataset group on GBIF to upload to.
     local_dataset_id = "edi.941.3"
     mocker.patch(
@@ -104,12 +104,12 @@ def test_upload_dataset_mocks(
     assert_successful_upload(captured, tmp_path, local_dataset_id)
 
 
-def test_upload_dataset_missing_local_dataset_id(rgstrs, tmp_path, capsys):
+def test_upload_dataset_missing_local_dataset_id(registrations, tmp_path, capsys):
     """Test that the upload_dataset function quits early if the local_dataset_id
     is not in the registrations file."""
     # Remove records for the edi.941 group for reuse in this test
-    rgstrs = rgstrs[rgstrs["local_dataset_group_id"] != "edi.941"]
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    registrations = registrations[registrations["local_dataset_group_id"] != "edi.941"]
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
     # Run the upload_dataset function w/a local_dataset_id that is not in the
     # registrations file.
     local_dataset_id = "edi.941.3"
@@ -117,29 +117,29 @@ def test_upload_dataset_missing_local_dataset_id(rgstrs, tmp_path, capsys):
     captured = capsys.readouterr()
     assert "is not in the registrations file" in captured.out
     registrations_final = _read_registrations_file(tmp_path / "registrations.csv")
-    assert registrations_final.shape == rgstrs.shape
+    assert registrations_final.shape == registrations.shape
     assert "Deleted local dataset endpoints" not in captured.out  # Never made it here
 
 
-def test_upload_dataset_already_marked_as_synchronized(rgstrs, tmp_path, capsys):
+def test_upload_dataset_already_marked_as_synchronized(registrations, tmp_path, capsys):
     """Test that the upload_dataset function quits early if the
     local_dataset_id is marked as synchronized with GBIF. This is the case when
     the function is unnecessarily called."""
     # Set the synchronized column to True for the last row of the
     # registrations, and get the local_dataset_id for use in the test.
-    rgstrs.loc[rgstrs.index[-1], "synchronized"] = True
-    local_dataset_id = rgstrs.loc[rgstrs.index[-1], "local_dataset_id"]
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    registrations.loc[registrations.index[-1], "synchronized"] = True
+    local_dataset_id = registrations.loc[registrations.index[-1], "local_dataset_id"]
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
     # Run the upload_dataset function
     upload_dataset(local_dataset_id, tmp_path / "registrations.csv")
     captured = capsys.readouterr()
     assert "is already synchronized with GBIF" in captured.out
     registrations_final = _read_registrations_file(tmp_path / "registrations.csv")
-    assert registrations_final.shape == rgstrs.shape
+    assert registrations_final.shape == registrations.shape
 
 
 def test_upload_dataset_already_synchronized_but_not_listed(
-    rgstrs, tmp_path, capsys, mocker
+    registrations, tmp_path, capsys, mocker
 ):
     """Test that the upload_dataset function quits early if the
     local_dataset_id is already synchronized with GBIF. This is the case when
@@ -147,9 +147,9 @@ def test_upload_dataset_already_synchronized_but_not_listed(
     previously timed out synchronization checks."""
     # Set the synchronized column to False for the last row of the
     # registrations, and get the local_dataset_id for use in the test.
-    rgstrs.loc[rgstrs.index[-1], "synchronized"] = False
-    local_dataset_id = rgstrs.loc[rgstrs.index[-1], "local_dataset_id"]
-    rgstrs.to_csv(tmp_path / "registrations.csv", index=False)
+    registrations.loc[registrations.index[-1], "synchronized"] = False
+    local_dataset_id = registrations.loc[registrations.index[-1], "local_dataset_id"]
+    registrations.to_csv(tmp_path / "registrations.csv", index=False)
     # Mock the synchronization check to return True and run the upload_dataset
     # function.
     mocker.patch("gbif_registrar._utilities._is_synchronized", return_value=True)
@@ -164,5 +164,5 @@ def test_upload_dataset_already_synchronized_but_not_listed(
         registrations_final["local_dataset_id"] == local_dataset_id
     ].tolist()[0]
     assert registrations_final.loc[index, "synchronized"]
-    assert registrations_final.shape == rgstrs.shape
+    assert registrations_final.shape == registrations.shape
     assert "Deleted local dataset endpoints" not in captured.out  # Never made it here

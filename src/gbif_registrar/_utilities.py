@@ -17,7 +17,7 @@ from gbif_registrar.config import (
 )
 
 
-def _check_completeness(rgstrs):
+def _check_completeness(registrations):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
@@ -26,7 +26,7 @@ def _check_completeness(rgstrs):
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -39,15 +39,15 @@ def _check_completeness(rgstrs):
     UserWarning
         If any registrations are incomplete.
     """
-    rgstrs = rgstrs[_expected_cols()].drop(["synchronized"], axis=1)
-    rgstrs = rgstrs[rgstrs.isna().any(axis=1)]
-    if len(rgstrs) > 0:
-        rows = rgstrs.index.to_series() + 1
+    registrations = registrations[_expected_cols()].drop(["synchronized"], axis=1)
+    registrations = registrations[registrations.isna().any(axis=1)]
+    if len(registrations) > 0:
+        rows = registrations.index.to_series() + 1
         rows = rows.astype("string")
         warnings.warn("Incomplete registrations in rows: " + ", ".join(rows))
 
 
-def _check_group_registrations(rgstrs):
+def _check_group_registrations(registrations):
     """Checks uniqueness of dataset group registrations.
 
     Registrations can be part of a group, the most recent of which is
@@ -55,7 +55,7 @@ def _check_group_registrations(rgstrs):
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -69,11 +69,11 @@ def _check_group_registrations(rgstrs):
         cardinality.
     """
     _check_one_to_one_cardinality(
-        data=rgstrs, col1="local_dataset_group_id", col2="gbif_dataset_uuid"
+        data=registrations, col1="local_dataset_group_id", col2="gbif_dataset_uuid"
     )
 
 
-def _check_synchronized(rgstrs):
+def _check_synchronized(registrations):
     """Checks if registrations have been synchronized.
 
     Registrations contain all the information needed for GBIF to successfully
@@ -83,7 +83,7 @@ def _check_synchronized(rgstrs):
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -95,16 +95,16 @@ def _check_synchronized(rgstrs):
     -----
     If a registration has not yet been crawled.
     """
-    if not rgstrs["synchronized"].all():
-        rows = rgstrs["synchronized"].index.to_series() + 1
-        rows = rows[~rgstrs["synchronized"]].astype("string")
+    if not registrations["synchronized"].all():
+        rows = registrations["synchronized"].index.to_series() + 1
+        rows = rows[~registrations["synchronized"]].astype("string")
         warnings.warn("Unsynchronized registrations in rows: " + ", ".join(rows))
 
 
-def _check_local_dataset_group_id_format(rgstrs):
+def _check_local_dataset_group_id_format(registrations):
     """Check the format of the local_dataset_group_id.
 
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -118,9 +118,9 @@ def _check_local_dataset_group_id_format(rgstrs):
     format used by the Environmental Data Initiative (EDI), i.e.
     `scope.identifier`.
     """
-    ids = rgstrs["local_dataset_id"]
+    ids = registrations["local_dataset_id"]
     expected_groups = ids.str.extract(r"(\D+\d+)")[0]
-    actual_groups = rgstrs["local_dataset_group_id"]
+    actual_groups = registrations["local_dataset_group_id"]
     res = expected_groups.compare(actual_groups)
     if len(res) > 0:
         rows = res.index.to_series() + 1
@@ -130,7 +130,7 @@ def _check_local_dataset_group_id_format(rgstrs):
         )
 
 
-def _check_local_dataset_id(rgstrs):
+def _check_local_dataset_id(registrations):
     """Checks registrations for unique local_dataset_id.
 
     Each registration is represented by a unique primary key, i.e. the
@@ -138,7 +138,7 @@ def _check_local_dataset_id(rgstrs):
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -151,19 +151,19 @@ def _check_local_dataset_id(rgstrs):
     UserWarning
         If values in the `local_dataset_id` column are not unique.
     """
-    dupes = rgstrs["local_dataset_id"].duplicated()
+    dupes = registrations["local_dataset_id"].duplicated()
     if any(dupes):
         dupes = dupes.index.to_series() + 1
         dupes = dupes.astype("string")
         warnings.warn("Duplicate local_dataset_id values in rows: " + ", ".join(dupes))
 
 
-def _check_local_dataset_id_format(rgstrs):
+def _check_local_dataset_id_format(registrations):
     """Check the format of the local_dataset_id.
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`read_registrations_file` to
         create this.
 
@@ -178,10 +178,10 @@ def _check_local_dataset_id_format(rgstrs):
 
     Examples
     --------
-    >>> rgstrs = _read_registrations_file('tests/registrations.csv')
-    >>> _check_local_dataset_id_format(rgstrs)
+    >>> registrations = _read_registrations_file('tests/registrations.csv')
+    >>> _check_local_dataset_id_format(registrations)
     """
-    ids = rgstrs["local_dataset_id"]
+    ids = registrations["local_dataset_id"]
     bad_ids = ~ids.str.contains(r"^.+\.\d+\.\d+$")
     if any(bad_ids):
         rows = ids[bad_ids].index.to_series() + 1
@@ -191,7 +191,7 @@ def _check_local_dataset_id_format(rgstrs):
         )
 
 
-def _check_local_endpoints(rgstrs):
+def _check_local_endpoints(registrations):
     """Checks uniqueness of local dataset endpoints.
 
     Registrations each have a unique endpoint, which is crawled by GBIF and
@@ -199,7 +199,7 @@ def _check_local_endpoints(rgstrs):
 
     Parameters
     ----------
-    rgstrs : pandas.DataFrame
+    registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
         create this.
 
@@ -213,7 +213,7 @@ def _check_local_endpoints(rgstrs):
         cardinality.
     """
     _check_one_to_one_cardinality(
-        data=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
+        data=registrations, col1="local_dataset_id", col2="local_dataset_endpoint"
     )
 
 
@@ -300,7 +300,7 @@ def _expected_cols():
     return cols
 
 
-def _get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
+def _get_gbif_dataset_uuid(local_dataset_group_id, registrations):
     """Return the gbif_dataset_uuid value.
 
     Parameters
@@ -308,7 +308,7 @@ def _get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
     local_dataset_group_id : str
         The dataset group identifier in the EDI repository. Has the format:
         {scope}.{identifier}.
-    rgstrs : pandas dataframe
+    registrations : pandas dataframe
         The registrations file as a dataframe.
 
 
@@ -327,21 +327,23 @@ def _get_gbif_dataset_uuid(local_dataset_group_id, rgstrs):
     of a dataset) to be registered with GBIF as a single dataset and displayed
     from a single URL endpoint on the GBIF system.
     """
-    # Look in the rgstrs dataframe to see if there is a matching
+    # Look in the registrations dataframe to see if there is a matching
     # local_data_set_group_id value, and it has a non-empty gbif_dataset_uuid
     # value. If so, get the gbif_dataset_uuid value.
-    has_group_id = local_dataset_group_id in rgstrs["local_dataset_group_id"].values
+    has_group_id = (
+        local_dataset_group_id in registrations["local_dataset_group_id"].values
+    )
     has_uuid = (
-        rgstrs.loc[
-            rgstrs["local_dataset_group_id"] == local_dataset_group_id,
+        registrations.loc[
+            registrations["local_dataset_group_id"] == local_dataset_group_id,
             "gbif_dataset_uuid",
         ]
         .notnull()
         .iloc[0]
     )
     if has_group_id and has_uuid:
-        gbif_dataset_uuid = rgstrs.loc[
-            rgstrs["local_dataset_group_id"] == local_dataset_group_id,
+        gbif_dataset_uuid = registrations.loc[
+            registrations["local_dataset_group_id"] == local_dataset_group_id,
             "gbif_dataset_uuid",
         ].iloc[0]
     # If there is no matching local_dataset_group_id value, or if there is a
