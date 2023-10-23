@@ -195,7 +195,7 @@ def complete_registration_records(registrations_file, local_dataset_id=None):
                 local_dataset_group_id=registrations.loc[
                     index, "local_dataset_group_id"
                 ],
-                rgstrs=registrations,
+                registrations=registrations,
             )
             # Add the gbif_dataset_uuid value to the gbif_dataset_uuid column
             # of the registrations dataframe.

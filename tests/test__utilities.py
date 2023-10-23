@@ -22,120 +22,124 @@ from gbif_registrar._utilities import (
 from gbif_registrar.config import PASTA_ENVIRONMENT
 
 
-def test_check_completeness_valid(rgstrs):
+def test_check_completeness_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_completeness(rgstrs)
+        _check_completeness(registrations)
         assert len(warns) == 0
 
 
-def test_check_completeness_warns(rgstrs):
+def test_check_completeness_warns(registrations):
     """An empty value, in a core column, is an incomplete registration."""
-    rgstrs.loc[0, "local_dataset_id"] = np.NaN
-    rgstrs.loc[2, "local_dataset_endpoint"] = np.NaN
+    registrations.loc[0, "local_dataset_id"] = np.NaN
+    registrations.loc[2, "local_dataset_endpoint"] = np.NaN
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_completeness(rgstrs)
+        _check_completeness(registrations)
         assert "Incomplete registrations" in str(warns[0].message)
         assert "1, 3" in str(warns[0].message)
 
 
-def test_check_local_dataset_id_valid(rgstrs):
+def test_check_local_dataset_id_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_id(rgstrs)
+        _check_local_dataset_id(registrations)
         assert len(warns) == 0
 
 
-def test_check_local_dataset_id_warns(rgstrs):
+def test_check_local_dataset_id_warns(registrations):
     """Non-unique primary keys are an issue, and accompanied by a warning."""
-    rgstrs = pd.concat([rgstrs, rgstrs.iloc[[-1]]], ignore_index=True)
+    registrations = pd.concat(
+        [registrations, registrations.iloc[[-1]]], ignore_index=True
+    )
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_id(rgstrs)
+        _check_local_dataset_id(registrations)
         assert "Duplicate local_dataset_id values" in str(warns[0].message)
         assert "5" in str(warns[0].message)
 
 
-def test_check_one_to_one_cardinality_valid(rgstrs):
+def test_check_one_to_one_cardinality_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
         _check_one_to_one_cardinality(
-            data=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
+            data=registrations, col1="local_dataset_id", col2="local_dataset_endpoint"
         )
         assert len(warns) == 0
 
 
-def test_check_one_to_one_cardinality_warn(rgstrs):
+def test_check_one_to_one_cardinality_warn(registrations):
     """Each element in a one-to-one relationship should have only one
     corresponding value, or else a warning is issued."""
-    rgstrs.loc[0, "local_dataset_id"] = rgstrs.loc[1, "local_dataset_id"]
-    rgstrs.loc[2, "local_dataset_endpoint"] = rgstrs.loc[3, "local_dataset_endpoint"]
+    registrations.loc[0, "local_dataset_id"] = registrations.loc[1, "local_dataset_id"]
+    registrations.loc[2, "local_dataset_endpoint"] = registrations.loc[
+        3, "local_dataset_endpoint"
+    ]
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
         _check_one_to_one_cardinality(
-            data=rgstrs, col1="local_dataset_id", col2="local_dataset_endpoint"
+            data=registrations, col1="local_dataset_id", col2="local_dataset_endpoint"
         )
         assert "should have 1-to-1 cardinality" in str(warns[0].message)
-        assert rgstrs.loc[1, "local_dataset_id"] in str(warns[0].message)
-        assert rgstrs.loc[3, "local_dataset_endpoint"] in str(warns[0].message)
+        assert registrations.loc[1, "local_dataset_id"] in str(warns[0].message)
+        assert registrations.loc[3, "local_dataset_endpoint"] in str(warns[0].message)
 
 
-def test_check_is_synchronized_valid(rgstrs):
+def test_check_is_synchronized_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_synchronized(rgstrs)
+        _check_synchronized(registrations)
         assert len(warns) == 0
 
 
-def test_check_is_synchronized_warn(rgstrs):
+def test_check_is_synchronized_warn(registrations):
     """Unsynchronized registrations result in a warning."""
-    rgstrs.loc[0, "synchronized"] = False
-    rgstrs.loc[2, "synchronized"] = False
+    registrations.loc[0, "synchronized"] = False
+    registrations.loc[2, "synchronized"] = False
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_synchronized(rgstrs)
+        _check_synchronized(registrations)
         assert "Unsynchronized registrations in rows" in str(warns[0].message)
         assert "1, 3" in str(warns[0].message)
 
 
-def test_check_local_dataset_id_format_valid(rgstrs):
+def test_check_local_dataset_id_format_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_id_format(rgstrs)
+        _check_local_dataset_id_format(registrations)
         assert len(warns) == 0
 
 
-def test_check_local_dataset_id_format_warn(rgstrs):
+def test_check_local_dataset_id_format_warn(registrations):
     """Malformed local dataset ID values issue a warning."""
-    rgstrs.loc[0, "local_dataset_id"] = "edi"
-    rgstrs.loc[2, "local_dataset_id"] = "knb-lter-msp.1"
+    registrations.loc[0, "local_dataset_id"] = "edi"
+    registrations.loc[2, "local_dataset_id"] = "knb-lter-msp.1"
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_id_format(rgstrs)
+        _check_local_dataset_id_format(registrations)
         assert "Invalid local_dataset_id values in rows" in str(warns[0].message)
         assert "1, 3" in str(warns[0].message)
 
 
-def test_check_local_dataset_group_id_format_valid(rgstrs):
+def test_check_local_dataset_group_id_format_valid(registrations):
     """The registrations file is valid, and doesn't throw a warning."""
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_group_id_format(rgstrs)
+        _check_local_dataset_group_id_format(registrations)
         assert len(warns) == 0
 
 
-def test_check_local_dataset_group_id_format_warn(rgstrs):
+def test_check_local_dataset_group_id_format_warn(registrations):
     """Malformed local dataset group ID values issue a warning."""
-    rgstrs.loc[0, "local_dataset_group_id"] = "edi.xxx"
+    registrations.loc[0, "local_dataset_group_id"] = "edi.xxx"
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
-        _check_local_dataset_group_id_format(rgstrs)
+        _check_local_dataset_group_id_format(registrations)
         assert "Invalid local_dataset_group_id values in rows" in str(warns[0].message)
         assert "1" in str(warns[0].message)
 
@@ -233,17 +237,17 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     assert res == expected
 
 
-def test_get_gbif_dataset_uuid_exists(rgstrs):
+def test_get_gbif_dataset_uuid_exists(registrations):
     """Test that the _get_gbif_dataset_uuid function returns the GBIF dataset
     UUID when the local dataset group ID already has a GBIF dataset UUID."""
-    row = rgstrs.iloc[-1]
+    row = registrations.iloc[-1]
     existing_group_id = row["local_dataset_group_id"]
     existing_uuid = row["gbif_dataset_uuid"]
-    res = _get_gbif_dataset_uuid(existing_group_id, rgstrs)
+    res = _get_gbif_dataset_uuid(existing_group_id, registrations)
     assert res == existing_uuid
 
 
-def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
+def test_get_gbif_dataset_uuid_does_not_exist(registrations, mocker):
     """Test that the _get_gbif_dataset_uuid function gets a new GBIF dataset
     UUID when the local dataset group ID does not have a GBIF dataset UUID."""
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
@@ -265,10 +269,10 @@ def test_get_gbif_dataset_uuid_does_not_exist(rgstrs, mocker):
         },
         index=[0],
     )
-    rgstrs = pd.concat(objs=[rgstrs, new_row], ignore_index=True)
+    registrations = pd.concat(objs=[registrations, new_row], ignore_index=True)
     # Run the _get_gbif_dataset_uuid function and check that it returns the new
     # GBIF dataset UUID.
-    res = _get_gbif_dataset_uuid("edi.929", rgstrs)
+    res = _get_gbif_dataset_uuid("edi.929", registrations)
     assert res == gbif_dataset_uuid
 
 
