@@ -1,7 +1,10 @@
 """Configure the test suite."""
 
 import pytest
+from gbif_registrar.authenticate import login
+from gbif_registrar.authenticate import logout
 from gbif_registrar._utilities import _read_registrations_file
+
 
 
 @pytest.fixture(name="eml")

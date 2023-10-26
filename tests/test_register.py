@@ -7,6 +7,7 @@ from gbif_registrar._utilities import _read_registrations_file, _expected_cols
 from gbif_registrar.register import register_dataset
 from gbif_registrar.register import initialize_registrations_file
 from gbif_registrar.register import complete_registration_records
+from gbif_registrar.authenticate import login, logout
 
 
 def test_complete_registration_records_ignores_complete_registrations(
@@ -28,6 +29,7 @@ def test_complete_registration_records_repairs_failed_registration(
     """Test that the complete_registration_records repairs a failed
     registration attempt."""
 
+    login("tests/config.json")
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     mocker.patch(
@@ -49,6 +51,7 @@ def test_complete_registration_records_repairs_failed_registration(
     assert registrations_final.shape[0] == registrations.shape[0]
     assert registrations_final.iloc[-1, -4:-1].notnull().all()
     assert registrations_final.iloc[-2, -4:-1].notnull().all()
+    logout()
 
 
 def test_complete_registration_records_operates_on_one_dataset(
@@ -56,6 +59,7 @@ def test_complete_registration_records_operates_on_one_dataset(
 ):
     """Test that the complete_registration_records function operates on a
     single local_dataset_id when specified."""
+    login("tests/config.json")
     # Create a registrations file with two incomplete registrations to test
     # that when specified the function only operates on the specified
     # local_dataset_id.
@@ -80,6 +84,7 @@ def test_complete_registration_records_operates_on_one_dataset(
     assert registrations_final.shape[0] == registrations.shape[0]
     assert registrations_final.iloc[-1, -4:-1].notnull().all()
     assert registrations_final.iloc[-2, -4:-1].isnull().all()
+    logout()
 
 
 def test_complete_registration_records_handles_empty_dataframe(
@@ -87,6 +92,7 @@ def test_complete_registration_records_handles_empty_dataframe(
 ):
     """Test that the complete_registration_records function handles a
     registrations file containing only a local_dataset_id."""
+    login("tests/config.json")
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     mocker.patch(
@@ -106,6 +112,7 @@ def test_complete_registration_records_handles_empty_dataframe(
     registrations_final = _read_registrations_file(tmp_path / "registrations.csv")
     assert registrations_final.shape[0] == registrations.shape[0]
     assert registrations_final.iloc[-1, -4:-1].notnull().all()
+    logout()
 
 
 def test_initialize_registrations_file_does_not_overwrite(tmp_path):
@@ -158,6 +165,7 @@ def test_register_dataset_success(
     """Test that the register_dataset function returns a file with a new row
     containing the local_dataset_id along with a gbif_dataset_uuid."""
 
+    login("tests/config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
@@ -179,6 +187,7 @@ def test_register_dataset_success(
     assert registrations_final.shape[0] == registrations.shape[0] + 1
     assert registrations_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert registrations_final.iloc[-1]["gbif_dataset_uuid"] == gbif_dataset_uuid
+    logout()
 
 
 def test_register_dataset_failure(local_dataset_id, tmp_path, registrations, mocker):
@@ -186,6 +195,7 @@ def test_register_dataset_failure(local_dataset_id, tmp_path, registrations, moc
     containing the local_dataset_id, but with the gbif_dataset_uuid value
     set to NA."""
 
+    login("tests/config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
@@ -205,12 +215,14 @@ def test_register_dataset_failure(local_dataset_id, tmp_path, registrations, moc
     assert registrations_final.shape[0] == registrations.shape[0] + 1
     assert registrations_final.iloc[-1]["local_dataset_id"] == local_dataset_id
     assert pd.isna(registrations_final.iloc[-1]["gbif_dataset_uuid"])
+    logout()
 
 
 def test_register_dataset_reuses_uuid_for_updates(tmp_path, registrations):
     """Test that the register_dataset function reuses the gbif_dataset_uuid
     for members of the same local_dataset_group_id. This is necessary for
     updating the metadata and endpoints of a dataset group in GBIF."""
+    login("tests/config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
@@ -230,3 +242,4 @@ def test_register_dataset_reuses_uuid_for_updates(tmp_path, registrations):
         registrations_final["local_dataset_id"] == new_local_dataset_id
     ]["gbif_dataset_uuid"]
     assert old_gbif_dataset_uuid.values == new_gbif_dataset_uuid.values
+    logout()

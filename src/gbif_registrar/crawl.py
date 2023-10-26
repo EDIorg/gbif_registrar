@@ -1,8 +1,8 @@
 """Functions for calling a GBIF crawl."""
 
+from os import environ
 from time import sleep
 from gbif_registrar import _utilities
-from gbif_registrar.config import GBIF_DATASET_BASE_URL, REGISTRY_BASE_URL
 
 
 def upload_dataset(local_dataset_id, registrations_file):
@@ -132,7 +132,7 @@ def upload_dataset(local_dataset_id, registrations_file):
         print(f"Upload of {local_dataset_id} to GBIF is complete.")
         print(
             "View the dataset on GBIF at:",
-            GBIF_DATASET_BASE_URL + "/" + gbif_dataset_uuid,
+            environ["GBIF_DATASET_BASE_URL"] + "/" + gbif_dataset_uuid,
         )
     else:
         print(
@@ -144,6 +144,6 @@ def upload_dataset(local_dataset_id, registrations_file):
         )
     print(
         f"For more information, see the GBIF log page for " f"{local_dataset_id}:",
-        REGISTRY_BASE_URL + "/" + gbif_dataset_uuid,
+        environ["REGISTRY_BASE_URL"] + "/" + gbif_dataset_uuid,
     )
     return None

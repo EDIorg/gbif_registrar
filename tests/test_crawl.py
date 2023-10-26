@@ -7,6 +7,7 @@ from gbif_registrar._utilities import (
 )
 from gbif_registrar.register import register_dataset
 from gbif_registrar.crawl import upload_dataset
+from gbif_registrar.authenticate import login, logout
 
 
 def assert_successful_upload(captured, tmp_path, local_dataset_id):
@@ -44,6 +45,8 @@ def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     revised dataset, to the GBIF staging environment from the EDI staging
     environment."""
 
+    login("tests/config.json")
+
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
     registrations = registrations[registrations["local_dataset_group_id"] != "edi.941"]
@@ -64,6 +67,8 @@ def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     captured = capsys.readouterr()
     assert_successful_upload(captured, tmp_path, local_dataset_id)
 
+    logout()
+
 
 def test_upload_dataset_mocks(
     registrations,
@@ -80,6 +85,7 @@ def test_upload_dataset_mocks(
     upload_dataset in more detail than test_upload_dataset_real_requests by
     simulating failures and edge cases.
     """
+    login("tests/config.json")
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
@@ -102,6 +108,8 @@ def test_upload_dataset_mocks(
     upload_dataset(local_dataset_id, tmp_path / "registrations.csv")
     captured = capsys.readouterr()
     assert_successful_upload(captured, tmp_path, local_dataset_id)
+
+    logout()  # Required due to unique context of this test
 
 
 def test_upload_dataset_missing_local_dataset_id(registrations, tmp_path, capsys):

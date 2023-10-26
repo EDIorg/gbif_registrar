@@ -1,5 +1,6 @@
 """Utility functions FOR INTERNAL USE ONLY!"""
 
+from os import environ
 import json
 from json import loads
 import warnings
@@ -7,14 +8,6 @@ import pandas as pd
 from lxml import etree
 import requests
 from requests import post, get, delete
-from gbif_registrar.config import (
-    PASTA_ENVIRONMENT,
-    USER_NAME,
-    PASSWORD,
-    GBIF_API,
-    INSTALLATION,
-    ORGANIZATION,
-)
 
 
 def _check_completeness(registrations):
@@ -268,8 +261,8 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
     """
     # Get the list of existing endpoints to delete
     endpoints = get(
-        GBIF_API + "/" + gbif_dataset_uuid + "/endpoint",
-        auth=(USER_NAME, PASSWORD),
+        environ["GBIF_API"] + "/" + gbif_dataset_uuid + "/endpoint",
+        auth=(environ["USER_NAME"], environ["PASSWORD"]),
         headers={"Content-Type": "application/json"},
         timeout=60,
     )
@@ -280,8 +273,8 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
         for item in endpoints.json():
             key = item.get("key")
             resp = delete(
-                GBIF_API + "/" + gbif_dataset_uuid + "/endpoint/" + str(key),
-                auth=(USER_NAME, PASSWORD),
+                environ["GBIF_API"] + "/" + gbif_dataset_uuid + "/endpoint/" + str(key),
+                auth=(environ["USER_NAME"], environ["PASSWORD"]),
                 headers={"Content-Type": "application/json"},
                 timeout=60,
             )
@@ -374,7 +367,7 @@ def _get_local_dataset_endpoint(local_dataset_id):
     identifier = local_dataset_id.split(".")[1]
     revision = local_dataset_id.split(".")[2]
     local_dataset_id = (
-        PASTA_ENVIRONMENT
+        environ["PASTA_ENVIRONMENT"]
         + "/package/download/eml/"
         + scope
         + "/"
@@ -474,9 +467,9 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
         Will raise an exception if the POST fails."""
     my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
     resp = post(
-        GBIF_API + "/" + gbif_dataset_uuid + "/endpoint",
+        environ["GBIF_API"] + "/" + gbif_dataset_uuid + "/endpoint",
         data=json.dumps(my_endpoint),
-        auth=(USER_NAME, PASSWORD),
+        auth=(environ["USER_NAME"], environ["PASSWORD"]),
         headers={"Content-Type": "application/json"},
         timeout=60,
     )
@@ -502,9 +495,9 @@ def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
     """
     metadata = _read_local_dataset_metadata(local_dataset_id)
     resp = post(
-        GBIF_API + "/" + gbif_dataset_uuid + "/document",
+        environ["GBIF_API"] + "/" + gbif_dataset_uuid + "/document",
         data=metadata,
-        auth=(USER_NAME, PASSWORD),
+        auth=(environ["USER_NAME"], environ["PASSWORD"]),
         headers={"Content-Type": "application/xml"},
         timeout=60,
     )
@@ -528,7 +521,7 @@ def _read_gbif_dataset_metadata(gbif_dataset_uuid):
     -----
     This is high-level metadata, not the full EML document.
     """
-    resp = requests.get(url=GBIF_API + "/" + gbif_dataset_uuid, timeout=60)
+    resp = requests.get(url=environ["GBIF_API"] + "/" + gbif_dataset_uuid, timeout=60)
     if resp.status_code != 200:
         print("HTTP request failed with status code: " + str(resp.status_code))
         print(resp.reason)
@@ -552,7 +545,7 @@ def _read_local_dataset_metadata(local_dataset_id):
     """
     # Build URL for metadata document to be read
     metadata_url = (
-        PASTA_ENVIRONMENT
+        environ["PASTA_ENVIRONMENT"]
         + "/package/metadata/eml/"
         + local_dataset_id.split(".")[0]
         + "/"
@@ -606,16 +599,16 @@ def _request_gbif_dataset_uuid():
     """
     title = "Placeholder title, to be written over by EML metadata from EDI"
     data = {
-        "installationKey": INSTALLATION,
-        "publishingOrganizationKey": ORGANIZATION,
+        "installationKey": environ["INSTALLATION"],
+        "publishingOrganizationKey": environ["ORGANIZATION"],
         "type": "SAMPLING_EVENT",
         "title": title,
     }
     headers = {"Content-Type": "application/json"}
     resp = requests.post(
-        url=GBIF_API,
+        url=environ["GBIF_API"],
         data=json.dumps(data),
-        auth=(USER_NAME, PASSWORD),
+        auth=(environ["USER_NAME"], environ["PASSWORD"]),
         headers=headers,
         timeout=60,
     )

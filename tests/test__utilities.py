@@ -1,5 +1,6 @@
 """Test utilities"""
 
+from os import environ
 import warnings
 import numpy as np
 import pandas as pd
@@ -19,7 +20,7 @@ from gbif_registrar._utilities import (
     _check_local_dataset_group_id_format,
     _read_registrations_file,
 )
-from gbif_registrar.config import PASTA_ENVIRONMENT
+from gbif_registrar.authenticate import login, logout
 
 
 def test_check_completeness_valid(registrations):
@@ -146,6 +147,7 @@ def test_check_local_dataset_group_id_format_warn(registrations):
 
 def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     """Test that _is_synchronized returns True on success."""
+    login("tests/config.json")
     registrations = _read_registrations_file("tests/registrations.csv")
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that _is_synchronized can access this information via the
@@ -179,10 +181,12 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     # Check if the dataset is synchronized
     res = _is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
     assert res
+    logout()
 
 
 def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
     """Test that _is_synchronized returns False on failure."""
+    login("tests/config.json")
     registrations = _read_registrations_file("tests/registrations.csv")
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
     local_dataset_id = "edi.941.3"
@@ -215,6 +219,7 @@ def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
     )
     res = _is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
     assert res is False
+    logout()
 
 
 def test_get_local_dataset_group_id(local_dataset_id):
@@ -232,9 +237,11 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     The expected value is a URL composed a base endpoint for the EDI
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
+    login("tests/config.json")
     res = _get_local_dataset_endpoint(local_dataset_id)
-    expected = PASTA_ENVIRONMENT + "/package/download/eml/edi/929/2"
+    expected = environ["PASTA_ENVIRONMENT"] + "/package/download/eml/edi/929/2"
     assert res == expected
+    logout()
 
 
 def test_get_gbif_dataset_uuid_exists(registrations):
@@ -278,61 +285,73 @@ def test_get_gbif_dataset_uuid_does_not_exist(registrations, mocker):
 
 def test_read_local_dataset_metadata_success(mocker, eml):
     """Test that _read_local_dataset_metadata returns a string on success."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = eml
     mocker.patch("requests.get", return_value=mock_response)
     metadata = _read_local_dataset_metadata("knb-lter-ble.20.1")
     assert isinstance(metadata, str)
+    logout()
 
 
 def test_read_local_dataset_metadata_failure(mocker):
     """Test that _read_local_dataset_metadata returns None on failure."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 404
     mock_response.reason = "Not Found"
     mocker.patch("requests.get", return_value=mock_response)
     metadata = _read_local_dataset_metadata("knb-lter-ble.20.10")
     assert metadata is None
+    logout()
 
 
 def test_read_gbif_dataset_metadata_success(mocker):
     """Test that _read_gbif_dataset_metadata returns a dict on success."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = """{"title":"This is a title"}"""
     mocker.patch("requests.get", return_value=mock_response)
     res = _read_gbif_dataset_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032ed1de485")
     assert isinstance(res, dict)
+    logout()
 
 
 def test_read_gbif_dataset_metadata_failure(mocker):
     """Test that _read_gbif_dataset_metadata returns None on failure."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 404
     mock_response.reason = "Not Found"
     mocker.patch("requests.get", return_value=mock_response)
     res = _read_gbif_dataset_metadata("cfb3f6d5-ed7d-4fff-9f1b-f032e")
     assert res is None
+    logout()
 
 
 def test_request_gbif_dataset_uuid_success(mocker):
     """Test that the _request_gbif_dataset_uuid function returns a UUID string
     when the HTTP request is successful."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 201
     mock_response.json.return_value = "4e70c80e-cf22-49a5-8bf7-280994500324"
     mocker.patch("requests.post", return_value=mock_response)
     res = _request_gbif_dataset_uuid()
     assert res == "4e70c80e-cf22-49a5-8bf7-280994500324"
+    logout()
 
 
 def test_request_gbif_dataset_uuid_failure(mocker):
     """Test that the _request_gbif_dataset_uuid function returns None when the
     HTTP request fails."""
+    login("tests/config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 400
     mock_response.reason = "Bad Request"
     mocker.patch("requests.post", return_value=mock_response)
     res = _request_gbif_dataset_uuid()
     assert res is None
+    logout()
