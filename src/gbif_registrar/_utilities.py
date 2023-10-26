@@ -261,7 +261,7 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     # Get the list of existing endpoints to delete
@@ -370,7 +370,7 @@ def _get_local_dataset_endpoint(local_dataset_id):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     scope = local_dataset_id.split(".")[0]
@@ -478,7 +478,7 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
@@ -511,7 +511,7 @@ def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     metadata = _read_local_dataset_metadata(local_dataset_id)
@@ -542,7 +542,7 @@ def _read_gbif_dataset_metadata(gbif_dataset_uuid):
     -----
     This is high-level metadata, not the full EML document.
 
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     resp = requests.get(url=environ["GBIF_API"] + "/" + gbif_dataset_uuid, timeout=60)
@@ -569,7 +569,7 @@ def _read_local_dataset_metadata(local_dataset_id):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     # Build URL for metadata document to be read
@@ -628,7 +628,7 @@ def _request_gbif_dataset_uuid():
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     title = "Placeholder title, to be written over by EML metadata from EDI"

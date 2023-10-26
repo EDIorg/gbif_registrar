@@ -7,7 +7,7 @@ from gbif_registrar._utilities import (
 )
 from gbif_registrar.register import register_dataset
 from gbif_registrar.crawl import upload_dataset
-from gbif_registrar.authenticate import login, logout
+from gbif_registrar.configure import load_configuration, unload_configuration
 
 
 def assert_successful_upload(captured, tmp_path, local_dataset_id):
@@ -45,7 +45,7 @@ def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     revised dataset, to the GBIF staging environment from the EDI staging
     environment."""
 
-    login("tests/test_config.json")
+    load_configuration("tests/test_config.json")
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
@@ -67,7 +67,7 @@ def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     captured = capsys.readouterr()
     assert_successful_upload(captured, tmp_path, local_dataset_id)
 
-    logout()
+    unload_configuration()
 
 
 def test_upload_dataset_mocks(
@@ -85,7 +85,7 @@ def test_upload_dataset_mocks(
     upload_dataset in more detail than test_upload_dataset_real_requests by
     simulating failures and edge cases.
     """
-    login("tests/test_config.json")
+    load_configuration("tests/test_config.json")
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
@@ -109,7 +109,7 @@ def test_upload_dataset_mocks(
     captured = capsys.readouterr()
     assert_successful_upload(captured, tmp_path, local_dataset_id)
 
-    logout()  # Required due to unique context of this test
+    unload_configuration()  # Required due to unique context of this test
 
 
 def test_upload_dataset_missing_local_dataset_id(registrations, tmp_path, capsys):

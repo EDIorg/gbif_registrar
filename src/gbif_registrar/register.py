@@ -79,7 +79,7 @@ def register_dataset(local_dataset_id, registrations_file):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
 
     Examples
@@ -141,7 +141,7 @@ def complete_registration_records(registrations_file, local_dataset_id=None):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
 
     Examples

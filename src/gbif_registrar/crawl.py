@@ -30,7 +30,7 @@ def upload_dataset(local_dataset_id, registrations_file):
     Print messages indicate the progress of the upload process. The messages
     are written to the standard output stream (stdout).
 
-    This function requires authentication with GBIF. Use the login function
+    This function requires authentication with GBIF. Use the load_configuration function
     from the authenticate module to do this.
     """
     print(f"Uploading {local_dataset_id} to GBIF.")

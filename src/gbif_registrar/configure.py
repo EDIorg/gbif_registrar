@@ -3,11 +3,11 @@ from json import load, dump
 from os import environ
 
 
-def login(configuration_file):
+def load_configuration(configuration_file):
     """Authenticates the user with the GBIF API and sets other global
     environment variables for use by the gbif_registrar package.
 
-    To remove these environment variables, use the logout function.
+    To remove these environment variables, use the unload_configuration function.
 
     Parameters
     ----------
@@ -19,14 +19,14 @@ def login(configuration_file):
     -------
     None
     """
-    with open(configuration_file, "r") as config:
+    with open(configuration_file, "r", encoding="utf-8") as config:
         config = load(config)
         for key, value in config.items():
             environ[key] = value
 
 
-def logout():
-    """Removes global environment variables set by the login function.
+def unload_configuration():
+    """Removes global environment variables set by the load_configuration function.
 
     Returns
     -------
@@ -67,8 +67,7 @@ def write_configuration(file_path):
         "GBIF_API": "http://api.gbif-uat.org/v1/dataset",
         "REGISTRY_BASE_URL": "https://registry.gbif-uat.org/dataset",
         "GBIF_DATASET_BASE_URL": "https://www.gbif-uat.org/dataset",
-        "PASTA_ENVIRONMENT": "https://pasta-s.lternet.edu"
+        "PASTA_ENVIRONMENT": "https://pasta-s.lternet.edu",
     }
-    # Write configuration to json file
-    with open(file_path, "w") as config:
+    with open(file_path, "w", encoding="utf-8") as config:
         dump(configuration, config, indent=4)
