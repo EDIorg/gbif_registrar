@@ -77,6 +77,11 @@ def register_dataset(local_dataset_id, registrations_file):
     None
         The registrations file, written back to `registrations_file` as a .csv.
 
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
+
     Examples
     --------
     >>> register_dataset("edi.929.2", "registrations.csv")
@@ -133,6 +138,11 @@ def complete_registration_records(registrations_file, local_dataset_id=None):
     -------
     None
         The registrations file, written back to `registrations_file` as a .csv.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
 
     Examples
     --------

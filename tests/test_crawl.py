@@ -45,7 +45,7 @@ def test_upload_dataset_real_requests(registrations, tmp_path, capsys):
     revised dataset, to the GBIF staging environment from the EDI staging
     environment."""
 
-    login("tests/config.json")
+    login("tests/test_config.json")
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test
@@ -85,7 +85,7 @@ def test_upload_dataset_mocks(
     upload_dataset in more detail than test_upload_dataset_real_requests by
     simulating failures and edge cases.
     """
-    login("tests/config.json")
+    login("tests/test_config.json")
 
     # Test the upload of a new dataset ...
     # Remove records for the edi.941 group for reuse in this test

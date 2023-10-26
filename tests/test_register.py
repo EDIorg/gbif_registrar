@@ -29,7 +29,7 @@ def test_complete_registration_records_repairs_failed_registration(
     """Test that the complete_registration_records repairs a failed
     registration attempt."""
 
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     mocker.patch(
@@ -59,7 +59,7 @@ def test_complete_registration_records_operates_on_one_dataset(
 ):
     """Test that the complete_registration_records function operates on a
     single local_dataset_id when specified."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Create a registrations file with two incomplete registrations to test
     # that when specified the function only operates on the specified
     # local_dataset_id.
@@ -92,7 +92,7 @@ def test_complete_registration_records_handles_empty_dataframe(
 ):
     """Test that the complete_registration_records function handles a
     registrations file containing only a local_dataset_id."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     mocker.patch(
@@ -165,7 +165,7 @@ def test_register_dataset_success(
     """Test that the register_dataset function returns a file with a new row
     containing the local_dataset_id along with a gbif_dataset_uuid."""
 
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
@@ -195,7 +195,7 @@ def test_register_dataset_failure(local_dataset_id, tmp_path, registrations, moc
     containing the local_dataset_id, but with the gbif_dataset_uuid value
     set to NA."""
 
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
@@ -222,7 +222,7 @@ def test_register_dataset_reuses_uuid_for_updates(tmp_path, registrations):
     """Test that the register_dataset function reuses the gbif_dataset_uuid
     for members of the same local_dataset_group_id. This is necessary for
     updating the metadata and endpoints of a dataset group in GBIF."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     # Create a copy of the registrations file in the temporary test directory
     # so that the test can modify it without affecting the original file.
     registrations.to_csv(tmp_path / "registrations.csv", index=False)

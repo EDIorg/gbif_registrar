@@ -147,7 +147,7 @@ def test_check_local_dataset_group_id_format_warn(registrations):
 
 def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     """Test that _is_synchronized returns True on success."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     registrations = _read_registrations_file("tests/registrations.csv")
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that _is_synchronized can access this information via the
@@ -186,7 +186,7 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
 
 def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
     """Test that _is_synchronized returns False on failure."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     registrations = _read_registrations_file("tests/registrations.csv")
     registrations.to_csv(tmp_path / "registrations.csv", index=False)
     local_dataset_id = "edi.941.3"
@@ -237,7 +237,7 @@ def test_get_local_dataset_endpoint(local_dataset_id):
     The expected value is a URL composed a base endpoint for the EDI
     repository Download Data Package Archive endpoint and the local dataset ID
     value broken into scope, identifier, and version."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     res = _get_local_dataset_endpoint(local_dataset_id)
     expected = environ["PASTA_ENVIRONMENT"] + "/package/download/eml/edi/929/2"
     assert res == expected
@@ -285,7 +285,7 @@ def test_get_gbif_dataset_uuid_does_not_exist(registrations, mocker):
 
 def test_read_local_dataset_metadata_success(mocker, eml):
     """Test that _read_local_dataset_metadata returns a string on success."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = eml
@@ -297,7 +297,7 @@ def test_read_local_dataset_metadata_success(mocker, eml):
 
 def test_read_local_dataset_metadata_failure(mocker):
     """Test that _read_local_dataset_metadata returns None on failure."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 404
     mock_response.reason = "Not Found"
@@ -309,7 +309,7 @@ def test_read_local_dataset_metadata_failure(mocker):
 
 def test_read_gbif_dataset_metadata_success(mocker):
     """Test that _read_gbif_dataset_metadata returns a dict on success."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = """{"title":"This is a title"}"""
@@ -321,7 +321,7 @@ def test_read_gbif_dataset_metadata_success(mocker):
 
 def test_read_gbif_dataset_metadata_failure(mocker):
     """Test that _read_gbif_dataset_metadata returns None on failure."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 404
     mock_response.reason = "Not Found"
@@ -334,7 +334,7 @@ def test_read_gbif_dataset_metadata_failure(mocker):
 def test_request_gbif_dataset_uuid_success(mocker):
     """Test that the _request_gbif_dataset_uuid function returns a UUID string
     when the HTTP request is successful."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 201
     mock_response.json.return_value = "4e70c80e-cf22-49a5-8bf7-280994500324"
@@ -347,7 +347,7 @@ def test_request_gbif_dataset_uuid_success(mocker):
 def test_request_gbif_dataset_uuid_failure(mocker):
     """Test that the _request_gbif_dataset_uuid function returns None when the
     HTTP request fails."""
-    login("tests/config.json")
+    login("tests/test_config.json")
     mock_response = mocker.Mock()
     mock_response.status_code = 400
     mock_response.reason = "Bad Request"

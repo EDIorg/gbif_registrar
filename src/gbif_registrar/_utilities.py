@@ -258,6 +258,11 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
     -------
     None
         Will raise an exception if the DELETE fails.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     # Get the list of existing endpoints to delete
     endpoints = get(
@@ -362,6 +367,11 @@ def _get_local_dataset_endpoint(local_dataset_id):
     str
         The local_dataset_endpoint URL value. This is the URL GBIF will crawl
         to access the local dataset.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     scope = local_dataset_id.split(".")[0]
     identifier = local_dataset_id.split(".")[1]
@@ -464,7 +474,13 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
     Returns
     -------
     None
-        Will raise an exception if the POST fails."""
+        Will raise an exception if the POST fails.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
+    """
     my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
     resp = post(
         environ["GBIF_API"] + "/" + gbif_dataset_uuid + "/endpoint",
@@ -492,6 +508,11 @@ def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
     -------
     None
         Will raise an exception if the POST fails.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     metadata = _read_local_dataset_metadata(local_dataset_id)
     resp = post(
@@ -520,6 +541,9 @@ def _read_gbif_dataset_metadata(gbif_dataset_uuid):
     Notes
     -----
     This is high-level metadata, not the full EML document.
+
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     resp = requests.get(url=environ["GBIF_API"] + "/" + gbif_dataset_uuid, timeout=60)
     if resp.status_code != 200:
@@ -542,6 +566,11 @@ def _read_local_dataset_metadata(local_dataset_id):
     -------
     str
         The metadata document for the local dataset in XML format.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     # Build URL for metadata document to be read
     metadata_url = (
@@ -596,6 +625,11 @@ def _request_gbif_dataset_uuid():
     str
         The GBIF dataset UUID value. This is the UUID assigned by GBIF to the
         local dataset group.
+
+    Notes
+    -----
+    This function requires authentication with GBIF. Use the login function
+    from the authenticate module to do this.
     """
     title = "Placeholder title, to be written over by EML metadata from EDI"
     data = {
