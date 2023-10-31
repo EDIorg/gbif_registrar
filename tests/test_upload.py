@@ -1,4 +1,4 @@
-"""Test crawl.py"""
+"""Test upload.py"""
 
 from re import search
 import pytest
@@ -6,7 +6,7 @@ from gbif_registrar._utilities import (
     _read_registrations_file,
 )
 from gbif_registrar.register import register_dataset
-from gbif_registrar.crawl import upload_dataset
+from gbif_registrar.upload import upload_dataset
 from gbif_registrar.configure import load_configuration, unload_configuration
 
 
