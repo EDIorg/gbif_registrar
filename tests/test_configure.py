@@ -11,9 +11,7 @@ from gbif_registrar.configure import (
 
 def test_load_configuration_creates_environmental_varaiables():
     """Test that the load_configuration function creates global environment variables."""
-    # Read the configuration file.
     load_configuration("tests/test_config.json")
-    # Check that the global environment variables are set as expected.
     assert environ["USER_NAME"] == "ws_client_demo"
     assert environ["PASSWORD"] == "Demo123"
     assert environ["ORGANIZATION"] == "0a16da09-7719-40de-8d4f-56a15ed52fb6"
@@ -30,7 +28,6 @@ def test_unload_configuration_removes_environmental_variables():
     """Test that the unload_configuration function removes global environment variables."""
     load_configuration("tests/test_config.json")
     unload_configuration()
-    # Check that the global environment variables are removed as expected.
     assert "USER_NAME" not in environ
     assert "PASSWORD" not in environ
     assert "ORGANIZATION" not in environ
@@ -45,7 +42,6 @@ def test_write_configuration(tmp_path):
     """Test that the write_configuration function writes a json file with the
     expected keys."""
     write_configuration(tmp_path / "test_config.json")
-    # Check that the configuration file was written as expected.
     with open(tmp_path / "test_config.json", "r", encoding="utf-8") as config:
         config = load(config)
         assert "USER_NAME" in config

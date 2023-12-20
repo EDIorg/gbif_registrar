@@ -35,12 +35,13 @@ def upload_dataset(local_dataset_id, registrations_file):
     """
     print(f"Uploading {local_dataset_id} to GBIF.")
 
-    # Read the registrations file to obtain relevant information for the upload
-    # process.
+    # Read the registrations file to obtain information about the
+    # local_dataset_id.
     with open(registrations_file, "r", encoding="utf-8") as registrations:
         registrations = _utilities._read_registrations_file(registrations_file)
 
-    # Stop if not registered
+    # A complete registration is required for this function to succeed. Stop
+    # if this is not the case.
     if local_dataset_id not in registrations["local_dataset_id"].values:
         print(
             "The local dataset ID is not in the registrations file. "
@@ -48,8 +49,7 @@ def upload_dataset(local_dataset_id, registrations_file):
         )
         return None
 
-    # Obtain relevant information for the upload process from the registrations
-    # file.
+    # Assign registration info to variables for easy access in this function.
     index = registrations.index[
         registrations["local_dataset_id"] == local_dataset_id
     ].tolist()[0]
@@ -58,7 +58,7 @@ def upload_dataset(local_dataset_id, registrations_file):
     synchronized = registrations.loc[index, "synchronized"]
 
     # Check if the local_dataset_id is already synchronized with GBIF and stop
-    # the upload process if it is.
+    # if it is.
     if synchronized:
         print(
             f"{local_dataset_id} is already synchronized with GBIF. Skipping"
@@ -67,9 +67,9 @@ def upload_dataset(local_dataset_id, registrations_file):
         return None
 
     # There is a latency in the initialization of a data package group on GBIF
-    # that can result in the is_synchronized function failing on string parsing
-    # errors. This case is unlikely to occur under other contexts than
-    # upload_dataset, so we handle it here.
+    # that can result in the _is_synchronized function failing due to string
+    # parsing errors. This case is unlikely to occur in contexts outside the
+    # upload_dataset function, so we handle it here.
     try:
         synchronized = _utilities._is_synchronized(local_dataset_id, registrations_file)
     except AttributeError:
@@ -92,21 +92,22 @@ def upload_dataset(local_dataset_id, registrations_file):
 
     # Clear the list of local endpoints so when the endpoint is added below,
     # it will result in only one being listed on the GBIF dataset landing page.
-    # Multiple listings could be confusing to end users.
+    # Multiple endpoint listings are confusing to end users.
     _utilities._delete_local_dataset_endpoints(gbif_dataset_uuid)
     print("Deleted local dataset endpoints from GBIF.")
 
     # Post the local dataset endpoint to GBIF. This will initiate a crawl of
     # the local dataset landing page metadata on the first post but not on
-    # subsequent posts (updates). In the latter case, the local dataset
-    # landing page metadata will also need to be posted to update the GBIF
-    # landing page (below).
+    # subsequent posts (the case of updated datasets). In the latter case, the
+    # local dataset landing page metadata will also need to be posted to update
+    # the GBIF landing page (below).
     _utilities._post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid)
     print(f"Posted local dataset endpoint {local_dataset_endpoint} to GBIF.")
 
-    # For revised datasets, post a new metadata document to update the GBIF
-    # landing page. This is necessary because GBIF doesn't "re-crawl" the
-    # local dataset metadata when the new local dataset endpoint is updated.
+    # For revised datasets, post a new metadata document in order to update
+    # the GBIF landing page. This is necessary because GBIF doesn't "re-crawl"
+    # the local dataset metadata when the new local dataset endpoint is
+    # updated.
     _utilities._post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
     print(f"Posted new metadata document for {local_dataset_id} to GBIF.")
 
