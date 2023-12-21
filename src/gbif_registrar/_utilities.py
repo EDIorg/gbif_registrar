@@ -326,8 +326,8 @@ def _get_gbif_dataset_uuid(local_dataset_group_id, registrations):
     from a single URL endpoint on the GBIF system.
     """
     # Look in the registrations dataframe to see if there is a matching
-    # local_data_set_group_id value, and it has a non-empty gbif_dataset_uuid
-    # value. If so, get the gbif_dataset_uuid value.
+    # local_data_set_group_id value, and if it has a non-empty
+    # gbif_dataset_uuid value. If so, get the gbif_dataset_uuid value.
     has_group_id = (
         local_dataset_group_id in registrations["local_dataset_group_id"].values
     )
