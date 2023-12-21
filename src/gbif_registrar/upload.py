@@ -14,7 +14,7 @@ def upload_dataset(local_dataset_id, registrations_file):
         The identifier of the dataset in the EDI repository. Has the format:
         {scope}.{identifier}.{revision}.
     registrations_file : str
-        The path to the registrations file.
+        Path of the registrations file.
 
     Returns
     -------

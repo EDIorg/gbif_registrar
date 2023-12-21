@@ -10,7 +10,7 @@ from gbif_registrar._utilities import _check_local_dataset_id_format
 from gbif_registrar._utilities import _check_local_dataset_group_id_format
 
 
-def validate_registrations(file_path):
+def validate_registrations(registrations_file):
     """Validates the registrations file.
 
     This is a wrapper to `_check_completeness`, `_check_local_dataset_id`,
@@ -19,7 +19,7 @@ def validate_registrations(file_path):
 
     Parameters
     ----------
-    file_path : str or pathlike object
+    registrations_file : str or pathlike object
         Path of the registrations file.
 
     Returns
@@ -35,7 +35,7 @@ def validate_registrations(file_path):
     --------
     >>> validate_registrations('registrations.csv')
     """
-    registrations = _read_registrations_file(file_path)
+    registrations = _read_registrations_file(registrations_file)
     _check_completeness(registrations)
     _check_local_dataset_id(registrations)
     _check_group_registrations(registrations)

@@ -151,7 +151,7 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     registrations = _read_registrations_file("tests/registrations.csv")
     # Add new line to registrations with a dataset that is synchronized with
     # GBIF so that _is_synchronized can access this information via the
-    # registrations_file argument.
+    # registrations argument.
 
     local_dataset_id = "edi.941.3"
     new_row = {
@@ -179,7 +179,9 @@ def test_is_synchronized_success(tmp_path, mocker, eml, gbif_metadata):
     )
 
     # Check if the dataset is synchronized
-    res = _is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    res = _is_synchronized(
+        local_dataset_id, registrations_file=tmp_path / "registrations.csv"
+    )
     assert res
     unload_configuration()
 
@@ -205,7 +207,9 @@ def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
         "gbif_registrar._utilities._read_gbif_dataset_metadata",
         return_value=mock_response,
     )
-    res = _is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    res = _is_synchronized(
+        local_dataset_id, registrations_file=tmp_path / "registrations.csv"
+    )
     assert res is False
 
     # Case 2: Response from _read_gbif_dataset_metadata has the wrong endpoint
@@ -217,7 +221,9 @@ def test_is_synchronized_failure(tmp_path, mocker, eml, gbif_metadata):
         "gbif_registrar._utilities._read_gbif_dataset_metadata",
         return_value=mock_response,
     )
-    res = _is_synchronized(local_dataset_id, file_path=tmp_path / "registrations.csv")
+    res = _is_synchronized(
+        local_dataset_id, registrations_file=tmp_path / "registrations.csv"
+    )
     assert res is False
     unload_configuration()
 

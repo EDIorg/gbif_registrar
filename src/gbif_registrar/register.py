@@ -11,7 +11,7 @@ from gbif_registrar._utilities import (
 )
 
 
-def initialize_registrations_file(file_path):
+def initialize_registrations_file(path):
     """Returns an empty registrations file.
 
     The registrations file maps datasets from the local EDI data repository to
@@ -20,7 +20,7 @@ def initialize_registrations_file(file_path):
 
     Parameters
     ----------
-    file_path : str
+    path : str
         Path of file to be written. A .csv file extension is expected.
 
     Returns
@@ -54,11 +54,11 @@ def initialize_registrations_file(file_path):
     --------
     >>> initialize_registrations_file("registrations.csv")
     """
-    if os.path.exists(file_path):
+    if os.path.exists(path):
         pass
     else:
         data = pd.DataFrame(columns=_expected_cols())
-        data.to_csv(file_path, index=False, mode="x")
+        data.to_csv(path, index=False, mode="x")
 
 
 def register_dataset(local_dataset_id, registrations_file):
@@ -75,7 +75,7 @@ def register_dataset(local_dataset_id, registrations_file):
     Returns
     -------
     None
-        The registrations file, written back to `registrations_file` as a .csv.
+        The registrations file, written back to `registrations` as a .csv.
 
     Notes
     -----
@@ -133,7 +133,7 @@ def complete_registration_records(registrations_file, local_dataset_id=None):
     Returns
     -------
     None
-        The registrations file, written back to `registrations_file` as a .csv.
+        The registrations file, written back to `registrations` as a .csv.
 
     Notes
     -----
