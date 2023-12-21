@@ -408,7 +408,7 @@ def _get_local_dataset_group_id(local_dataset_id):
     return local_dataset_group_id
 
 
-def _is_synchronized(local_dataset_id, file_path):
+def _is_synchronized(local_dataset_id, registrations_file):
     """Check if a local dataset is synchronized with the GBIF registry.
 
     Parameters
@@ -416,9 +416,8 @@ def _is_synchronized(local_dataset_id, file_path):
     local_dataset_id : str
         The identifier of the dataset in the EDI repository. Has the format:
         {scope}.{identifier}.{revision}.
-    file_path : str
-        Path of the registrations file containing the registration information
-        for the local dataset.
+    registrations_file : str
+        Path of the registrations file.
 
     Returns
     -------
@@ -432,7 +431,7 @@ def _is_synchronized(local_dataset_id, file_path):
     GBIF instance.
     """
     # Get the gbif_dataset_uuid to use in the GBIF API call.
-    registrations = _read_registrations_file(file_path)
+    registrations = _read_registrations_file(registrations_file)
     gbif_dataset_uuid = registrations.loc[
         registrations["local_dataset_id"] == local_dataset_id, "gbif_dataset_uuid"
     ].values[0]
