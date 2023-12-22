@@ -1,4 +1,4 @@
-"""Test register_dataset.py"""
+"""Test the register.py module"""
 
 import os.path
 import hashlib
@@ -116,7 +116,8 @@ def test_complete_registration_records_handles_empty_dataframe(
 
 
 def test_initialize_registrations_file_does_not_overwrite(tmp_path):
-    """Does not overwrite."""
+    """Test that the initialize_registrations_file function does not overwrite
+    an existing registrations file."""
     file = tmp_path / "registrations.csv"
     initialize_registrations_file(file)
     with open(file, "rb") as registrations:
@@ -127,7 +128,8 @@ def test_initialize_registrations_file_does_not_overwrite(tmp_path):
 
 
 def test_initialize_registrations_file_has_expected_columns(tmp_path):
-    """Has expected columns."""
+    """Test that the initialize_registrations_file function creates a
+    registrations file with the expected columns."""
     file = tmp_path / "registrations.csv"
     initialize_registrations_file(file)
     data = pd.read_csv(file, delimiter=",")
@@ -136,14 +138,16 @@ def test_initialize_registrations_file_has_expected_columns(tmp_path):
 
 
 def test_initialize_registrations_file_writes_to_path(tmp_path):
-    """File is written to path."""
+    """Test that the initialize_registrations_file function writes a
+    registrations file to the specified path."""
     file = tmp_path / "registrations.csv"
     initialize_registrations_file(file)
     assert os.path.exists(file)
 
 
 def test_read_registrations_reads_file():
-    """Reads the file."""
+    """Test that the _read_registrations_file function reads the registrations
+    file."""
     registrations = _read_registrations_file("tests/registrations.csv")
     assert isinstance(registrations, pd.DataFrame)
 

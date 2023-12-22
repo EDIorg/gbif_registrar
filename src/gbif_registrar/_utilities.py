@@ -1,4 +1,4 @@
-"""Utility functions FOR INTERNAL USE ONLY!"""
+"""Utility functions for internal use only."""
 
 from os import environ
 import json
@@ -14,8 +14,7 @@ def _check_completeness(registrations):
     """Checks registrations for completeness.
 
     A complete registration has values for all fields except (perhaps)
-    `synchronized`, which is not essential for initiating a GBIF
-    crawl.
+    `synchronized`, which is not essential for uploading to GBIF.
 
     Parameters
     ----------
@@ -44,7 +43,7 @@ def _check_group_registrations(registrations):
     """Checks uniqueness of dataset group registrations.
 
     Registrations can be part of a group, the most recent of which is
-    considered to be the authoratative version of the series.
+    considered to be the authoritative version of the series.
 
     Parameters
     ----------
@@ -95,7 +94,7 @@ def _check_synchronized(registrations):
 
 
 def _check_local_dataset_group_id_format(registrations):
-    """Check the format of the local_dataset_group_id.
+    """Checks the format of the local_dataset_group_id.
 
     registrations : pandas.DataFrame
         A dataframe of the registrations file. Use`_read_registrations_file` to
@@ -152,7 +151,7 @@ def _check_local_dataset_id(registrations):
 
 
 def _check_local_dataset_id_format(registrations):
-    """Check the format of the local_dataset_id.
+    """Checks the format of the local_dataset_id.
 
     Parameters
     ----------
@@ -211,7 +210,7 @@ def _check_local_endpoints(registrations):
 
 
 def _check_one_to_one_cardinality(data, col1, col2):
-    """Check for one-to-one cardinality between two columns of a dataframe.
+    """Checks for one-to-one cardinality between two columns of a dataframe.
 
     This is a helper function used in a couple registration checks.
 
@@ -247,7 +246,7 @@ def _check_one_to_one_cardinality(data, col1, col2):
 
 
 def _delete_local_dataset_endpoints(gbif_dataset_uuid):
-    """Delete all local dataset endpoints from a GBIF dataset.
+    """Deletes all local dataset endpoints from a GBIF dataset.
 
     Parameters
     ----------
@@ -261,8 +260,8 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     # Get the list of existing endpoints to delete
     endpoints = get(
@@ -287,7 +286,13 @@ def _delete_local_dataset_endpoints(gbif_dataset_uuid):
 
 
 def _expected_cols():
-    """Expected columns of the registrations file"""
+    """Returns expected columns of the registrations file.
+
+    Returns
+    -------
+    list
+        The expected columns of the registrations file.
+    """
     cols = [
         "local_dataset_id",
         "local_dataset_group_id",
@@ -299,15 +304,15 @@ def _expected_cols():
 
 
 def _get_gbif_dataset_uuid(local_dataset_group_id, registrations):
-    """Return the gbif_dataset_uuid value.
+    """Returns the gbif_dataset_uuid value.
 
     Parameters
     ----------
     local_dataset_group_id : str
-        The dataset group identifier in the EDI repository. Has the format:
-        {scope}.{identifier}.
+        The dataset group identifier in the EDI repository.
     registrations : pandas dataframe
-        The registrations file as a dataframe.
+        The registrations file as a dataframe. Use the _read_registrations_file
+        function to create this.
 
 
     Returns
@@ -316,14 +321,7 @@ def _get_gbif_dataset_uuid(local_dataset_group_id, registrations):
         The gbif_dataset_uuid value. This is the UUID assigned by GBIF to the
         local dataset group identifier. A new value will be returned if a
         gbif_dataset_uuid value doesn't already exist for a
-        local_dataset_group_id.
-
-    Notes
-    -----
-    The local_dataset_group_id and gbif_dataset_uuid values have a one-to-one
-    relationship because this allows a dataset series (i.e. multiple versions
-    of a dataset) to be registered with GBIF as a single dataset and displayed
-    from a single URL endpoint on the GBIF system.
+        local_dataset_group_id in the registrations file.
     """
     # Look in the registrations dataframe to see if there is a matching
     # local_data_set_group_id value, and if it has a non-empty
@@ -354,13 +352,12 @@ def _get_gbif_dataset_uuid(local_dataset_group_id, registrations):
 
 
 def _get_local_dataset_endpoint(local_dataset_id):
-    """Return the local_dataset_endpoint value.
+    """Returns the local_dataset_endpoint value.
 
     Parameters
     ----------
     local_dataset_id : str
-        The dataset identifier in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The dataset identifier in the EDI repository.
 
     Returns
     -------
@@ -370,8 +367,8 @@ def _get_local_dataset_endpoint(local_dataset_id):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     scope = local_dataset_id.split(".")[0]
     identifier = local_dataset_id.split(".")[1]
@@ -389,13 +386,12 @@ def _get_local_dataset_endpoint(local_dataset_id):
 
 
 def _get_local_dataset_group_id(local_dataset_id):
-    """Return the local_dataset_group_id value.
+    """Returns the local_dataset_group_id value.
 
     Parameters
     ----------
     local_dataset_id : str
-        The dataset identifier in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The dataset identifier in the EDI repository.
 
     Returns
     -------
@@ -409,13 +405,12 @@ def _get_local_dataset_group_id(local_dataset_id):
 
 
 def _is_synchronized(local_dataset_id, registrations_file):
-    """Check if a local dataset is synchronized with the GBIF registry.
+    """Checks if a local dataset is synchronized with the GBIF registry.
 
     Parameters
     ----------
     local_dataset_id : str
-        The identifier of the dataset in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The identifier of the dataset in the EDI repository.
     registrations_file : str
         Path of the registrations file.
 
@@ -458,7 +453,7 @@ def _is_synchronized(local_dataset_id, registrations_file):
 
 
 def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
-    """Post a local dataset endpoint to GBIF.
+    """Posts a local dataset endpoint to GBIF.
 
     Parameters
     ----------
@@ -466,7 +461,7 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
         This is the URL for downloading the dataset (.zip archive) at the EDI
         repository. Use the _get_local_dataset_endpoint function in the
         utilities module to obtain this value.
-        gbif_dataset_uuid : str
+    gbif_dataset_uuid : str
         The registration identifier assigned by GBIF to the local dataset
         group.
 
@@ -477,8 +472,8 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     my_endpoint = {"url": local_dataset_endpoint, "type": "DWC_ARCHIVE"}
     resp = post(
@@ -492,13 +487,12 @@ def _post_local_dataset_endpoint(local_dataset_endpoint, gbif_dataset_uuid):
 
 
 def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
-    """Post a new metadata document to GBIF.
+    """Posts a new metadata document to GBIF.
 
     Parameters
     ----------
     local_dataset_id : str
-        The identifier of the dataset in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The identifier of the dataset in the EDI repository.
     gbif_dataset_uuid : str
         The registration identifier assigned by GBIF to the local dataset
         group.
@@ -510,8 +504,8 @@ def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     metadata = _read_local_dataset_metadata(local_dataset_id)
     resp = post(
@@ -525,7 +519,7 @@ def _post_new_metadata_document(local_dataset_id, gbif_dataset_uuid):
 
 
 def _read_gbif_dataset_metadata(gbif_dataset_uuid):
-    """Read the metadata of a GBIF dataset.
+    """Reads the metadata of a GBIF dataset.
 
     Parameters
     ----------
@@ -541,8 +535,8 @@ def _read_gbif_dataset_metadata(gbif_dataset_uuid):
     -----
     This is high-level metadata, not the full EML document.
 
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     resp = requests.get(url=environ["GBIF_API"] + "/" + gbif_dataset_uuid, timeout=60)
     if resp.status_code != 200:
@@ -558,8 +552,7 @@ def _read_local_dataset_metadata(local_dataset_id):
     Parameters
     ----------
     local_dataset_id : str
-        The identifier of the dataset in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The identifier of the dataset in the EDI repository.
 
     Returns
     -------
@@ -568,8 +561,8 @@ def _read_local_dataset_metadata(local_dataset_id):
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     # Build URL for metadata document to be read
     metadata_url = (
@@ -590,7 +583,7 @@ def _read_local_dataset_metadata(local_dataset_id):
 
 
 def _read_registrations_file(registrations_file):
-    """Return the registrations file as a Pandas dataframe.
+    """Returns the registrations file as a Pandas dataframe.
 
     Parameters
     ----------
@@ -617,7 +610,7 @@ def _read_registrations_file(registrations_file):
 
 
 def _request_gbif_dataset_uuid():
-    """Request a GBIF dataset UUID value from GBIF.
+    """Requests a GBIF dataset UUID value from GBIF.
 
     Returns
     -------
@@ -627,8 +620,8 @@ def _request_gbif_dataset_uuid():
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     title = "Placeholder title, to be written over by EML metadata from EDI"
     data = {

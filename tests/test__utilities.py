@@ -1,4 +1,4 @@
-"""Test utilities"""
+"""Test the _utilities.py module."""
 
 from os import environ
 import warnings
@@ -262,7 +262,8 @@ def test_get_gbif_dataset_uuid_exists(registrations):
 
 def test_get_gbif_dataset_uuid_does_not_exist(registrations, mocker):
     """Test that the _get_gbif_dataset_uuid function gets a new GBIF dataset
-    UUID when the local dataset group ID does not have a GBIF dataset UUID."""
+    UUID when the local dataset group ID does not yet have a GBIF dataset
+    UUID."""
     # Mock the response from _get_gbif_dataset_uuid, so we don't have to make
     # an actual HTTP request.
     gbif_dataset_uuid = "a_new_gbif_dataset_uuid"
