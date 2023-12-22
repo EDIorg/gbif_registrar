@@ -1,4 +1,4 @@
-"""Functions for calling a GBIF crawl."""
+"""Upload datasets to GBIF."""
 
 from os import environ
 from time import sleep
@@ -6,20 +6,19 @@ from gbif_registrar import _utilities
 
 
 def upload_dataset(local_dataset_id, registrations_file):
-    """Upload a local dataset to GBIF.
+    """Upload a dataset to GBIF.
 
     Parameters
     ----------
     local_dataset_id : str
-        The identifier of the dataset in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The identifier of a dataset in the EDI repository.
     registrations_file : str
         Path of the registrations file.
 
     Returns
     -------
     None
-        The registrations file as a .csv.
+        The registrations file written back to itself as a .csv.
 
     Notes
     -----
@@ -27,11 +26,10 @@ def upload_dataset(local_dataset_id, registrations_file):
     file. The status is True if the dataset was successfully synchronized with
     GBIF and False otherwise.
 
-    Print messages indicate the progress of the upload process. The messages
-    are written to the standard output stream (stdout).
+    Print messages indicate the progress of the upload process.
 
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the authenticate module to do this.
     """
     print(f"Uploading {local_dataset_id} to GBIF.")
 
@@ -111,7 +109,7 @@ def upload_dataset(local_dataset_id, registrations_file):
     _utilities._post_new_metadata_document(local_dataset_id, gbif_dataset_uuid)
     print(f"Posted new metadata document for {local_dataset_id} to GBIF.")
 
-    # Run the is_synchronized function until a True value is returned or the
+    # Run the _is_synchronized function until a True value is returned or the
     # max number of attempts is reached.
     synchronized = False
     max_attempts = 12  # Average synchronization time is 20 seconds

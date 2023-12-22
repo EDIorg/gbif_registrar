@@ -1,23 +1,28 @@
-"""Initialize the gbif_registrar package."""
+"""Configure the gbif_registrar package for use."""
+
 from json import load, dump
 from os import environ
 
 
 def load_configuration(configuration_file):
-    """Authenticates the user with the GBIF API and sets other global
-    environment variables for use by the gbif_registrar package.
+    """Loads the configuration file as global environment variables for use
+    by the gbif_registrar functions.
 
-    To remove these environment variables, use the unload_configuration function.
+    Remove these environment variables with the unload_configuration function.
 
     Parameters
     ----------
     configuration_file : str
-        Path of the configuration file. Create this file using the
-        write_configuration function.
+        Path of the configuration file.
 
     Returns
     -------
     None
+
+    Notes
+    -----
+    Create a template configuration file with the initialize_configuration_file
+    function.
     """
     with open(configuration_file, "r", encoding="utf-8") as config:
         config = load(config)
@@ -26,7 +31,8 @@ def load_configuration(configuration_file):
 
 
 def unload_configuration():
-    """Removes global environment variables set by the load_configuration function.
+    """Removes global environment variables set by the load_configuration
+    function.
 
     Returns
     -------
@@ -46,18 +52,41 @@ def unload_configuration():
         del environ[key]
 
 
-def write_configuration(file_path):
-    """Write the template configuration to file.
+def initialize_configuration_file(file_path):
+    """Returns a template configuration file to path.
+
+    The template configuration contains all the parameters a user needs to set
+    up the gbif_registrar package for use.
 
     Parameters
     ----------
     file_path : str
-        Path to the configuration file.
+        Path to which the configuration file will be written.
 
     Returns
     -------
     None
-        Writes the configuration file to disk.
+        Writes the template configuration file to disk as a .json file.
+
+    Notes
+    -----
+    The configuration file is a .json file with the following keys:
+        USER_NAME : str
+            The username for the GBIF account.
+        PASSWORD : str
+            The password for the GBIF account.
+        ORGANIZATION : str
+            The organization key for the GBIF account.
+        INSTALLATION : str
+            The installation key for the GBIF account.
+        GBIF_API : str
+            The GBIF API endpoint.
+        REGISTRY_BASE_URL : str
+            The GBIF registry base URL.
+        GBIF_DATASET_BASE_URL : str
+            The GBIF dataset base URL.
+        PASTA_ENVIRONMENT : str
+            The PASTA environment base URL.
     """
     configuration = {
         "USER_NAME": "ws_client_demo",

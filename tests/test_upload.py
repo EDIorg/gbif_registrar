@@ -1,4 +1,4 @@
-"""Test upload.py"""
+"""Test the upload.py module."""
 
 from re import search
 import pytest
@@ -12,7 +12,7 @@ from gbif_registrar.configure import load_configuration, unload_configuration
 
 def assert_successful_upload(captured, tmp_path, local_dataset_id):
     """Declare test assertions that are shared for both the 'new' and
-    'updated' dataset cases, and works for both real and mocked HTTP
+    'updated' dataset test cases, and works for both real and mocked HTTP
     requests."""
     # Check the std out for the expected print statements.
     pattern = "Uploading .+ to GBIF."

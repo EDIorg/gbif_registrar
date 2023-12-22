@@ -1,4 +1,4 @@
-"""A module for validating the registrations file"""
+"""Validate the dataset registrations file."""
 
 from gbif_registrar.register import _read_registrations_file
 from gbif_registrar._utilities import _check_completeness
@@ -11,16 +11,17 @@ from gbif_registrar._utilities import _check_local_dataset_group_id_format
 
 
 def validate_registrations(registrations_file):
-    """Validates the registrations file.
+    """Validates the dataset registrations file.
 
-    This is a wrapper to `_check_completeness`, `_check_local_dataset_id`,
-    `_check_group_registrations`, `_check_local_endpoints`, and
-    `_check_synchronized`.
+    This function validates the dataset registrations file by checking for
+    completeness, local dataset ID format, group registrations, local
+    endpoints, and synchronization status. If any issues are found, a warning
+    is raised.
 
     Parameters
     ----------
     registrations_file : str or pathlike object
-        Path of the registrations file.
+        Path of the dataset registrations file.
 
     Returns
     -------
@@ -29,7 +30,7 @@ def validate_registrations(registrations_file):
     Warns
     -----
     UserWarning
-        If registration issues are found.
+        Warnings are issued if registration issues are found.
 
     Examples
     --------

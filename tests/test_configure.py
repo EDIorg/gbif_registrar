@@ -1,16 +1,17 @@
-"""Test init.py"""
+"""Test the configure.py module"""
 
 from json import load
 from os import environ
 from gbif_registrar.configure import (
     load_configuration,
     unload_configuration,
-    write_configuration,
+    initialize_configuration_file,
 )
 
 
 def test_load_configuration_creates_environmental_varaiables():
-    """Test that the load_configuration function creates global environment variables."""
+    """Test that the load_configuration function creates the expected set of
+    global environment variables."""
     load_configuration("tests/test_config.json")
     assert environ["USER_NAME"] == "ws_client_demo"
     assert environ["PASSWORD"] == "Demo123"
@@ -20,12 +21,12 @@ def test_load_configuration_creates_environmental_varaiables():
     assert environ["REGISTRY_BASE_URL"] == "https://registry.gbif-uat.org/dataset"
     assert environ["GBIF_DATASET_BASE_URL"] == "https://www.gbif-uat.org/dataset"
     assert environ["PASTA_ENVIRONMENT"] == "https://pasta-s.lternet.edu"
-    # Clean up the environment variables.
-    unload_configuration()
+    unload_configuration()  # clean up after the test
 
 
 def test_unload_configuration_removes_environmental_variables():
-    """Test that the unload_configuration function removes global environment variables."""
+    """Test that the unload_configuration function removes the expected set of
+    global environment variables."""
     load_configuration("tests/test_config.json")
     unload_configuration()
     assert "USER_NAME" not in environ
@@ -38,10 +39,10 @@ def test_unload_configuration_removes_environmental_variables():
     assert "PASTA_ENVIRONMENT" not in environ
 
 
-def test_write_configuration(tmp_path):
-    """Test that the write_configuration function writes a json file with the
-    expected keys."""
-    write_configuration(tmp_path / "test_config.json")
+def test_initialize_configuration_file(tmp_path):
+    """Test that the initialize_configuration_file function writes a json file
+    with the expected keys."""
+    initialize_configuration_file(tmp_path / "test_config.json")
     with open(tmp_path / "test_config.json", "r", encoding="utf-8") as config:
         config = load(config)
         assert "USER_NAME" in config

@@ -1,4 +1,5 @@
-"""Functions for registering datasets with GBIF."""
+"""Register datasets with GBIF."""
+
 import os.path
 import tempfile
 import pandas as pd
@@ -11,22 +12,21 @@ from gbif_registrar._utilities import (
 )
 
 
-def initialize_registrations_file(path):
-    """Returns an empty registrations file.
+def initialize_registrations_file(file_path):
+    """Returns a template registrations file to path.
 
     The registrations file maps datasets from the local EDI data repository to
-    the remote GBIF registry and indicates synchronization status between the
-    two.
+    the remote GBIF registry.
 
     Parameters
     ----------
-    path : str
+    file_path : str
         Path of file to be written. A .csv file extension is expected.
 
     Returns
     -------
     None
-        The registrations file as a .csv.
+        Writes the template registrations file to disk as a .csv.
 
     Notes
     -----
@@ -34,7 +34,8 @@ def initialize_registrations_file(path):
 
     - `local_dataset_id`: The dataset identifier in the EDI repository. This
       is the primary key. The term 'dataset' used here, is synonymous with the
-      term 'data package' in the EDI repository.
+      term 'data package' in the EDI repository. Values in this column have
+      the format: {scope}.{identifier}.{revision}.
     - `local_dataset_group_id`: The dataset group identifier in the EDI
       repository. This often forms a one-to-many relationship with
       `local_dataset_id`. The term 'dataset group' used here, is synonymous
@@ -45,7 +46,7 @@ def initialize_registrations_file(path):
     - `gbif_dataset_uuid`: The registration identifier assigned by GBIF to the
       `local_dataset_group_id`. This forms a one-to-one relationship with
       `local_dataset_group_id`.
-    - `is_synchronized`: The synchronization status of the `local_dataset_id`
+    - `synchronized`: The synchronization status of the `local_dataset_id`
       with GBIF. Is `True` if the local dataset is synchronized with GBIF, and
       `False` if the local dataset is not synchronized with GBIF. This forms
       a one-to-one relationship with `local_dataset_id`.
@@ -54,33 +55,33 @@ def initialize_registrations_file(path):
     --------
     >>> initialize_registrations_file("registrations.csv")
     """
-    if os.path.exists(path):
+    if os.path.exists(file_path):
         pass
     else:
         data = pd.DataFrame(columns=_expected_cols())
-        data.to_csv(path, index=False, mode="x")
+        data.to_csv(file_path, index=False, mode="x")
 
 
 def register_dataset(local_dataset_id, registrations_file):
-    """Register a local dataset with GBIF and add it to the registrations file.
+    """Registers a local dataset with GBIF and adds it to the registrations
+    file.
 
     Parameters
     ----------
     local_dataset_id : str
-        The dataset identifier in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}.
+        The local dataset identifier.
     registrations_file : str
         The path of the registrations file.
 
     Returns
     -------
     None
-        The registrations file, written back to `registrations` as a .csv.
+        The registrations file, written back to itself as a .csv.
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the configure module to do this.
 
     Examples
     --------
@@ -114,37 +115,37 @@ def register_dataset(local_dataset_id, registrations_file):
 
 
 def complete_registration_records(registrations_file, local_dataset_id=None):
-    """Return a completed set of registration records.
+    """Returns a completed set of registration records.
 
-    This function can be run to repair one or more registrations that have
-    missing values in the local_dataset_group_id, local_dataset_endpoint, or
-    gbif_dataset_uuid columns.
+    This function can be run to repair one or more dataset registrations that
+    have incomplete information in the local_dataset_group_id,
+    local_dataset_endpoint, or gbif_dataset_uuid columns.
 
     Parameters
     ----------
     registrations_file : str
         The path of the registrations file.
     local_dataset_id : str, optional
-        The dataset identifier in the EDI repository. Has the format:
-        {scope}.{identifier}.{revision}. If provided, only the registration
-        record for the local_dataset_id will be completed. If not provided,
-        all registration records with missing values will be completed.
+        The dataset identifier in the EDI repository. If provided, only the
+        registration record for the specified `local_dataset_id` will be
+        completed. If not provided, all registration records with incomplete
+        information will be repaired.
 
     Returns
     -------
     None
-        The registrations file, written back to `registrations` as a .csv.
+        The registrations file, written back to itself as a .csv.
 
     Notes
     -----
-    This function requires authentication with GBIF. Use the load_configuration function
-    from the authenticate module to do this.
+    This function requires authentication with GBIF. Use the load_configuration
+    function from the configure module to do this.
 
     Examples
     --------
     >>> # Complete all registration records with missing values.
     >>> complete_registration_records("registrations.csv")
-    >>> # Complete the registration record for the local_dataset_id.
+    >>> # Repair the registration record for a specific dataset.
     >>> complete_registration_records("registrations.csv", "edi.929.2")
     """
     registrations = _read_registrations_file(registrations_file)
