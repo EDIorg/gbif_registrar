@@ -30,6 +30,10 @@ def upload_dataset(local_dataset_id, registrations_file):
 
     This function requires authentication with GBIF. Use the load_configuration
     function from the authenticate module to do this.
+
+    Examples
+    --------
+    >>> upload_dataset("edi.1.1", "registrations.csv")
     """
     print(f"Uploading {local_dataset_id} to GBIF.")
 
