@@ -1,16 +1,80 @@
 # gbif_registrar
 
-For registering EDI data packages with GBIF
+The `gbif_registrar` is a set of Python workflows designed for uploading [Environmental Data Initiative](https://edirepository.org/) (EDI) DwCA-Event core formatted datasets to the [Biodiversity Information Facility](https://www.gbif.org/) (GBIF). This enhances discovery and utilization of EDI data, contributing to improved biodiversity insights.
 
-## Installation
+_Note, the term "dataset" used here is synonymous with "[data package](https://edirepository.org/resources/the-data-package)"._
 
-```bash
-pip install git+https://github.com/clnsmth/gbif_registrar.git#egg=gbif_registrar
+## How it Works
+
+The `gbif_registrar` operates through three steps:
+
+1. **Register**: Associates an EDI dataset identifier with a GBIF group identifier and stores this information locally in a registrations file for future reference.
+2. **Validate**: Runs a validation check on the registration file to ensure all necessary content is in place.
+3. **Upload**: Initiates the upload of the newly registered dataset to GBIF.
+
+For subsequent versions of an EDI dataset, the process repeats. The new version is added to the registrations file under the data package series GBIF group ID, undergoes validation for required content, and replaces the previous instance on GBIF.
+
+## Getting Started
+1. **Create a Conda Environment**: Install the `gbif_registrar` package to set up a dedicated Conda environment.
+2. **Initialize Configuration**: Locally configure `gbif_registrar` to run on test or production environments and add credentials for authentication.
+3. **Initialize Registration File**: Create a registration file to store information about EDI datasets on GBIF.
+4. **Build the Main Workflow**: Develop the main.py workflow, outlining the major steps of the process. Below is an example of such a workflow:
+
+```python
+from gbif_registrar.configure import load_configuration, unload_configuration
+from gbif_registrar.register import register_dataset
+from gbif_registrar.validate import validate_registrations
+from gbif_registrar.upload import upload_dataset
+
+
+def main(local_dataset_id, registration_file, configuration_file):
+    """Register a dataset and upload to GBIF.
+
+    Parameters
+    ----------
+    local_dataset_id : str
+        The identifier of a dataset in the EDI repository.
+    registration_file : str
+        Path of the registrations file.
+    configuration_file : str
+        Path of the configuration file.
+
+    Returns
+    -------
+    None
+        The registrations file written back to itself as a .csv, and containing
+        the new registration record and synchronization status.
+
+    Examples
+    --------
+    >>> main("edi.929.2", "registrations.csv", "configuration.json")
+    """
+    load_configuration(configuration_file)
+    register_dataset(local_dataset_id, registration_file)
+    validate_registrations(registration_file)
+    upload_dataset(local_dataset_id, registration_file)
+    unload_configuration()
 ```
 
-## Usage
 
-- TODO
+### Installation
+
+The `gbif_registrar` may be installed from GitHub using pip: 
+
+```bash
+pip install git+https://github.com/EDIorg/gbif_registrar.git#egg=gbif_registrar
+```
+
+## Troubleshooting
+
+If a registration fails:
+1. Attempt to fix missing components by running the `complete_registration_records` function.
+2. If the issue persists, manually diagnose the issue (see `gbif_registrar` messages) and edit the registrations file. 
+3. Rerun the validation check to ensure completeness.
+
+### Developer Notes:
+- To preserve acquired data and prevent duplication issues on GBIF, results are continuously written to the registration file.
+- Integration tests that upload staged EDI datasets to the GBIF test server are run manually to save time in the development cycle and to respect GBIF storage space. To run the integration test, uncomment the "skip" marker on test_upload_dataset_real_requests in the test suite.
 
 ## Contributing
 
