@@ -75,6 +75,9 @@ If a registration fails:
 ## Developer Notes
 - To preserve acquired data and prevent duplication issues on GBIF, results are continuously written to the registration file.
 - Integration tests that upload staged EDI datasets to the GBIF test server are run manually to save time in the development cycle and to respect GBIF storage space. To run the integration test, uncomment the "skip" marker on test_upload_dataset_real_requests in the test suite.
+- The `gbif_registrar` wraps the [EDI](https://pastaplus-core.readthedocs.io/en/latest/doc_tree/pasta_api/index.html) and [GBIF](https://www.gbif.org/developer/registry) APIs. We therefore encourage maintainers of this package 
+to subscribe to the [EDI PASTA GitHub repository](https://github.com/PASTAplus/PASTA) and the [GBIF API mailing list](https://lists.gbif.org/mailman/listinfo/api-users) for timely updates on outages and changes, so that the codebase can be updated accordingly.
+ 
 
 ## Contributing
 
