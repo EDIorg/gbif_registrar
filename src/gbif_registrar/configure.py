@@ -23,6 +23,10 @@ def load_configuration(configuration_file):
     -----
     Create a template configuration file with the initialize_configuration_file
     function.
+
+    Examples
+    --------
+    >>> load_configuration("configuration.json")
     """
     with open(configuration_file, "r", encoding="utf-8") as config:
         config = load(config)
@@ -37,6 +41,10 @@ def unload_configuration():
     Returns
     -------
     None
+
+    Examples
+    --------
+    >>> unload_configuration()
     """
     env_vars = [
         "USER_NAME",
@@ -87,6 +95,10 @@ def initialize_configuration_file(file_path):
             The GBIF dataset base URL.
         PASTA_ENVIRONMENT : str
             The PASTA environment base URL.
+
+    Examples
+    --------
+    >>> initialize_configuration_file("configuration.json")
     """
     configuration = {
         "USER_NAME": "ws_client_demo",
