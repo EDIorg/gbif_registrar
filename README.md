@@ -15,7 +15,11 @@ The `gbif_registrar` operates through three steps:
 For subsequent versions of an EDI dataset, the process repeats. The new version is added to the registrations file under the data package series GBIF group ID, undergoes validation for required content, and replaces the previous instance on GBIF.
 
 ## Getting Started
-1. **Create a Conda Environment**: Install the `gbif_registrar` package to set up a dedicated Conda environment.
+1. **Install**: The `gbif_registrar` may be installed from GitHub using pip: 
+
+```bash
+pip install git+https://github.com/EDIorg/gbif_registrar.git#egg=gbif_registrar
+```
 2. **Initialize Configuration**: Locally configure `gbif_registrar` to run on test or production environments and add credentials for authentication.
 3. **Initialize Registration File**: Create a registration file to store information about EDI datasets on GBIF.
 4. **Build the Main Workflow**: Develop the main.py workflow, outlining the major steps of the process. Below is an example of such a workflow:
@@ -54,15 +58,6 @@ def main(local_dataset_id, registration_file, configuration_file):
     validate_registrations(registration_file)
     upload_dataset(local_dataset_id, registration_file)
     unload_configuration()
-```
-
-
-### Installation
-
-The `gbif_registrar` may be installed from GitHub using pip: 
-
-```bash
-pip install git+https://github.com/EDIorg/gbif_registrar.git#egg=gbif_registrar
 ```
 
 ## Troubleshooting
