@@ -49,7 +49,9 @@ def initialize_registrations_file(file_path):
     - `synchronized`: The synchronization status of the `local_dataset_id`
       with GBIF. Is `True` if the local dataset is synchronized with GBIF, and
       `False` if the local dataset is not synchronized with GBIF. This forms
-      a one-to-one relationship with `local_dataset_id`.
+      a one-to-one relationship with `local_dataset_id`. Note, older dataset
+      versions that have previously been synchronized will continue to have
+      a `True` status, even though they are no longer hosted on GBIF.
 
     Examples
     --------
