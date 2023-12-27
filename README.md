@@ -72,7 +72,7 @@ If a registration fails:
 2. If the issue persists, manually diagnose the issue (see `gbif_registrar` messages) and edit the registrations file. 
 3. Rerun the validation check to ensure completeness.
 
-### Developer Notes:
+## Developer Notes
 - To preserve acquired data and prevent duplication issues on GBIF, results are continuously written to the registration file.
 - Integration tests that upload staged EDI datasets to the GBIF test server are run manually to save time in the development cycle and to respect GBIF storage space. To run the integration test, uncomment the "skip" marker on test_upload_dataset_real_requests in the test suite.
 
