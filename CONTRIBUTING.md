@@ -1,12 +1,14 @@
 # Contributing to gbif_registrar
 
-The goal of gbif_registrar is to help data repositories register datasets with GBIF and keep them up-to-date. Any task related process is supported.
+The goal of `gbif_registrar` is to help the EDI data repository register datasets with GBIF and keep them up-to-date. Any task related process is supported.
 
-We welcome community contributions to the work!
+We welcome community contributions to this work.
 
 ## Development and Release Process
 
-The `main` branch always reflects the current stable release, a `development` branch is used for merging features, and `feature` branches create changes. Feature branches are named with the corresponding issue # and a short description (e.g., `30-release-workflow`). Once a feature passes review, it's commit history is squashed and commit title, following the [Angular commit style](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format), is added along with reference to the issue it closes. The feature is merged into `development`. `development` is reviewed before each release, and upon approval is merged into `main`. Merges to `main` kick-off a GitHub Action workflow in which Python Semantic Release bumps the version number, tags the release, and builds the changelog. Additionally, the workflow updates package documentation, creates a downloadable release on GitHub, and archives it with Zenodo. Finally, the changes introduced to `main` during the release process are merged back into `development` to keep the branches synchronized.
+The `main` branch always reflects the current stable release, a `development` branch is used for merging features, and `feature` branches create changes. Once a feature passes review, it's commit history is squashed and commit title, following the [Angular commit style](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format), is added along with reference to the issue it closes. The feature is merged into `development`. `development` is reviewed before each release, and upon approval is merged into `main`. 
+
+Merges to `main` kick-off a GitHub Action workflow in which Python Semantic Release bumps the version number, tags the release, and builds the changelog. Additionally, the workflow updates package documentation, creates a downloadable release on GitHub, and archives it with Zenodo. Finally, the changes introduced to `main` during the release process are merged back into `development` to keep the branches synchronized.
 
 ## Types of Contributions
 
@@ -28,7 +30,7 @@ Look through the GitHub issues for features. Anything tagged with "enhancement" 
 
 ### Write Documentation
 
-You can never have enough documentation! Please feel free to contribute to any part of the documentation, such as the official docs, docstrings, or even
+Please feel free to contribute to any part of the documentation, such as the official docs, docstrings, or even
 on the web in blog posts, articles, and such.
 
 ## Repository Structure
@@ -39,7 +41,7 @@ This repository is structured as a standard Python package following the convent
 
 This project uses Python Semantic Release to streamline the deployment process. As a consequence, the [Angular commit style](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) is required. 
 
-Issues corresponding to a commit should be referenced at the end of the commit message title line. For example, `feat: Add framework for new feature (#3, #5)`. This provides readers helpful context for interpreting the changelog.
+Issues corresponding to a commit should be referenced at the end of the commit message title line. For example, `feat: add framework for new feature (#3, #5)`. This provides readers helpful context for interpreting the changelog.
 
 ## Testing
 
