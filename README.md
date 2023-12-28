@@ -60,6 +60,12 @@ def main(local_dataset_id, registration_file, configuration_file):
     unload_configuration()
 ```
 
+5. **Run the Workflow**: Run the workflow from the command line, passing in the required arguments:
+
+```python
+main("edi.929.2", "registrations.csv", "configuration.json")
+```
+
 ## Troubleshooting
 
 If a registration fails:
