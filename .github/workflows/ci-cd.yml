@@ -80,7 +80,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: RELEASE_TOKEN
+        token: GITHUB_TOKEN
 
     - name: Install poetry
       uses: snok/install-poetry@v1
