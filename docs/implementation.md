@@ -32,3 +32,7 @@ Step 2.1 is a consultation between EDI and the data submitter (or representative
 
 ### Failure Points
 How are failures resolved? (e.g., a local script fails, gbif is down) how is progress tracked?
+
+
+## GBIF Process
+describe how to work with GBIF. their vocab, EDI's role, etc.
