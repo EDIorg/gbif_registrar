@@ -33,8 +33,8 @@ def test_check_completeness_valid(registrations):
 
 def test_check_completeness_warns(registrations):
     """An empty value, in a core column, is an incomplete registration."""
-    registrations.loc[0, "local_dataset_id"] = np.NaN
-    registrations.loc[2, "local_dataset_endpoint"] = np.NaN
+    registrations.loc[0, "local_dataset_id"] = np.nan
+    registrations.loc[2, "local_dataset_endpoint"] = np.nan
     with warnings.catch_warnings(record=True) as warns:
         warnings.simplefilter("always")
         _check_completeness(registrations)
