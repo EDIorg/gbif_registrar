@@ -39,15 +39,15 @@ dependencies:
   - libgfortran5=15.2.0
   - libiconv=1.18
   - liblapack=3.11.0
-  - liblzma=5.8.2
+  - liblzma=5.8.3
   - libopenblas=0.3.32
-  - libsqlite=3.52.0
+  - libsqlite=3.53.0
   - libxml2=2.15.2
   - libxml2-16=2.15.2
   - libxslt=1.1.43
   - libzlib=1.3.2
-  - llvm-openmp=22.1.2
-  - lxml=6.0.2
+  - llvm-openmp=22.1.3
+  - lxml=6.0.4
   - markdown-it-py=3.0.0
   - markupsafe=3.0.3
   - mccabe=0.7.0
@@ -58,11 +58,11 @@ dependencies:
   - ncurses=6.5
   - numpy=2.2.6
   - openssl=3.6.2
-  - packaging=26.0
+  - packaging=26.1
   - pandas=2.3.3
   - pathspec=1.0.4
   - pip=26.0.1
-  - platformdirs=4.9.4
+  - platformdirs=4.9.6
   - pluggy=1.6.0
   - pygments=2.20.0
   - pylint=4.0.5
@@ -101,6 +101,6 @@ dependencies:
   - urllib3=2.6.3
   - wheel=0.46.3
   - yaml=0.2.5
-  - zipp=3.23.0
+  - zipp=3.23.1
   - zstd=1.5.7
 prefix: /opt/miniconda3/envs/gbif_registrar
