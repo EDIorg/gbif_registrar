@@ -22,7 +22,6 @@ dependencies:
   - h2=4.3.0
   - hpack=4.1.0
   - hyperframe=6.1.0
-  - icu=78.3
   - idna=3.11
   - imagesize=2.0.0
   - importlib-metadata=8.8.0
@@ -31,7 +30,7 @@ dependencies:
   - jinja2=3.1.6
   - libblas=3.11.0
   - libcblas=3.11.0
-  - libcxx=22.1.3
+  - libcxx=22.1.4
   - libexpat=2.7.5
   - libffi=3.5.2
   - libgcc=15.2.0
@@ -42,12 +41,12 @@ dependencies:
   - liblzma=5.8.3
   - libopenblas=0.3.32
   - libsqlite=3.53.0
-  - libxml2=2.15.2
-  - libxml2-16=2.15.2
+  - libxml2=2.15.3
+  - libxml2-16=2.15.3
   - libxslt=1.1.43
   - libzlib=1.3.2
-  - llvm-openmp=22.1.3
-  - lxml=6.0.4
+  - llvm-openmp=22.1.4
+  - lxml=6.1.0
   - markdown-it-py=3.0.0
   - markupsafe=3.0.3
   - mccabe=0.7.0
