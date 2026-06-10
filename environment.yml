@@ -41,7 +41,7 @@ dependencies:
   - liblzma=5.8.3
   - libmpdec=4.0.0
   - libopenblas=0.3.33
-  - libsqlite=3.53.1
+  - libsqlite=3.53.2
   - libxml2=2.15.3
   - libxml2-16=2.15.3
   - libxslt=1.1.43
@@ -57,7 +57,7 @@ dependencies:
   - myst-parser=5.1.0
   - ncurses=6.6
   - numpy=2.4.6
-  - openssl=3.6.2
+  - openssl=3.6.3
   - packaging=26.2
   - pandas=3.0.3
   - pathspec=1.1.1
