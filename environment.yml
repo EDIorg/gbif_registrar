@@ -13,8 +13,8 @@ dependencies:
   - bzip2=1.0.8
   - ca-certificates=2026.6.17
   - certifi=2026.6.17
-  - charset-normalizer=3.4.7
-  - click=8.4.1
+  - charset-normalizer=3.4.9
+  - click=8.4.2
   - colorama=0.4.6
   - dill=0.4.1
   - docutils=0.21.2
@@ -41,7 +41,7 @@ dependencies:
   - liblzma=5.8.3
   - libmpdec=4.0.0
   - libopenblas=0.3.33
-  - libsqlite=3.53.2
+  - libsqlite=3.53.3
   - libxml2=2.15.3
   - libxml2-16=2.15.3
   - libxslt=1.1.43
@@ -56,7 +56,7 @@ dependencies:
   - mypy_extensions=1.1.0
   - myst-parser=5.1.0
   - ncurses=6.6
-  - numpy=2.5.0
+  - numpy=2.5.1
   - openssl=3.6.3
   - packaging=26.2
   - pandas=3.0.3
@@ -95,7 +95,7 @@ dependencies:
   - tk=8.6.13
   - tomli=2.4.1
   - tomlkit=0.15.0
-  - typing_extensions=4.15.0
+  - typing_extensions=4.16.0
   - tzdata=2025c
   - urllib3=2.7.0
   - yaml=0.2.5
